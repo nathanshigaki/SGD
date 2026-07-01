@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.UsuarioRequest;
 import com.govmt.sgd.dto.response.UsuarioResponse;
@@ -20,6 +21,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
 
+    @Transactional
     public UsuarioResponse createUsuario(UsuarioRequest usuarioRequest){
         if (usuarioRequest.nome().strip() == null) throw new IllegalArgumentException("Nome vazio");
         if (usuarioRequest.senha() == null) throw new IllegalArgumentException("Senha vazia");
@@ -28,6 +30,7 @@ public class UsuarioService {
             usuarioRepository.save(usuarioMapper.toUsuarioFromRequest(usuarioRequest)));
     }
 
+    @Transactional(readOnly = true)
     public List<UsuarioResponse> getAll(){
         return usuarioRepository.findAll()
                 .stream()
@@ -35,12 +38,14 @@ public class UsuarioService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public UsuarioResponse findById(UUID id){
         return usuarioRepository.findById(id)
                 .map(usuarioMapper::toResponseFromUsuario)
                 .orElseThrow(() -> new RuntimeException("N encontrado"));
     }
 
+    @Transactional
     public UsuarioResponse updateUsuario(UsuarioRequest usuarioRequest){
         UsuarioResponse usuarioResponse = findById(usuarioRequest.id());
 
@@ -51,6 +56,7 @@ public class UsuarioService {
         return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
 
+    @Transactional
     public void deleteUsuario(UUID id){
         UsuarioResponse usuarioExiste = findById(id);
         usuarioRepository.delete(usuarioMapper.toUsuarioFromResponse(usuarioExiste));
