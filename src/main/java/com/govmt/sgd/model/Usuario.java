@@ -40,7 +40,7 @@ public class Usuario {
     private String senha;
 
     @Column(columnDefinition = "text[]")
-    private List<String> permissoao;
+    private List<String> permissao; 
 
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
