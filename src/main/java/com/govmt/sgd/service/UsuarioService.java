@@ -21,17 +21,11 @@ public class UsuarioService {
     private final UsuarioMapper usuarioMapper;
 
     public UsuarioResponse createUsuario(UsuarioRequest usuarioRequest){
-        if (usuarioRequest.nome().strip() == null){
-            throw new IllegalArgumentException("Nome vazio");
-        }
-
-        if (usuarioRequest.senha() == null){
-            throw new IllegalArgumentException("Senha vazia");
-        }
-
-        Usuario usuarioSalvar = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
-        Usuario usuarioSalvado = usuarioRepository.save(usuarioSalvar);
-        return usuarioMapper.toResponseFromUsuario(usuarioSalvado);
+        if (usuarioRequest.nome().strip() == null) throw new IllegalArgumentException("Nome vazio");
+        if (usuarioRequest.senha() == null) throw new IllegalArgumentException("Senha vazia");
+        
+        return usuarioMapper.toResponseFromUsuario(
+            usuarioRepository.save(usuarioMapper.toUsuarioFromRequest(usuarioRequest)));
     }
 
     public List<UsuarioResponse> getAll(){
@@ -49,21 +43,16 @@ public class UsuarioService {
 
     public UsuarioResponse updateUsuario(UsuarioRequest usuarioRequest){
         UsuarioResponse usuarioResponse = findById(usuarioRequest.id());
-        Usuario usuarioUpdate = usuarioMapper.toUsuarioFromResponse(usuarioResponse);
 
-        if (usuarioResponse.nome() != usuarioRequest.nome()) usuarioUpdate.setNome(usuarioRequest.nome());
-        if (usuarioResponse.email() != usuarioRequest.email()) usuarioUpdate.setEmail(usuarioRequest.email());
-        if (usuarioResponse.senha() != usuarioRequest.senha() && usuarioRequest.senha() != null) usuarioUpdate.setSenha(usuarioRequest.senha());
-        if (usuarioResponse.permissao() != usuarioRequest.permissao()) usuarioUpdate.setPermissao(usuarioRequest.permissao());
-        if (usuarioResponse.atualizadoEm() != usuarioRequest.atualizadoEm()) usuarioUpdate.setAtualizadoEm(usuarioRequest.atualizadoEm());
+        if (usuarioResponse.nome() == usuarioRequest.nome()) throw new IllegalArgumentException("mesmo nome");
 
-        Usuario usuarioSalvo = usuarioRepository.save(usuarioUpdate);
-        return usuarioMapper.toResponseFromUsuario(usuarioSalvo);
+        Usuario usuario = usuarioMapper.toUsuarioFromResponse(usuarioResponse);
+        usuario.setNome(usuarioRequest.nome());
+        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
 
     public void deleteUsuario(UUID id){
         UsuarioResponse usuarioExiste = findById(id);
-        Usuario usuarioApagar = usuarioMapper.toUsuarioFromResponse(usuarioExiste);
-        usuarioRepository.delete(usuarioApagar);
+        usuarioRepository.delete(usuarioMapper.toUsuarioFromResponse(usuarioExiste));
     }
 }
