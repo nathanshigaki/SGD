@@ -51,7 +51,8 @@ public class OrgaoService {
         OrgaoResponse orgaoResponse = findById(orgaoRequest.id());
         Orgao orgao = orgaoMapper.toOrgaoFromResponse(orgaoResponse);
 
-        
+        orgaoMapper.updateOrgaoFromRequest(orgaoRequest, orgao);
+        return orgaoMapper.toResponseFromOrgao(orgao);
     }
 
     @Transactional
