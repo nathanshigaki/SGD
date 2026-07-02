@@ -19,12 +19,7 @@ public interface DocumentoUsuarioMapper {
     @Mapping(source = "usuario.id", target = "usuarioId")
     DocumentoUsuarioRequest toRequestFromDocumentoUsuario(DocumentoUsuario documentoUsuario);
 
-    @Mapping(source = "documento", target = "documentoId")
-    @Mapping(source = "usuario", target = "usuarioId")
     DocumentoUsuarioResponse toResponseFromDocumentoUsuario(DocumentoUsuario documentoUsuario);
-
-    @Mapping(source = "documentoId", target = "documento")
-    @Mapping(source = "usuarioId", target = "usuario")
     DocumentoUsuario toDocumentoUsuarioFromResponse(DocumentoUsuarioResponse response);
 
     @Mapping(target = "id", ignore = true)

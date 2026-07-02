@@ -4,11 +4,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public record UsuarioRequest(
     UUID id,
+
+    @NotBlank
     String nome,
+
+    @NotBlank
     String email,
+
+    @NotBlank
     String senha,
+
+    @NotNull
     List<String> permissao,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm
