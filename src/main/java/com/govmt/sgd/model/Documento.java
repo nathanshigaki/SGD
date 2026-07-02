@@ -3,6 +3,7 @@ package com.govmt.sgd.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +39,9 @@ public class Documento {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orgao_id", nullable = false)
     private Orgao orgao;  
+
+    @OneToMany(mappedBy = "documento")
+    List<DocumentoUsuario> usuarios;
 
     @Column(nullable = false)
     private String sigdoc; 

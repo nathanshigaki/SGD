@@ -19,11 +19,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DocumentoUsuarioService {
 
+    private final UsuarioService usuarioService;
+    private final DocumentoService documentoService;
     private final DocumentoUsuarioRepository documentoUsuarioRepository;
     private final DocumentoUsuarioMapper documentoUsuarioMapper;
 
     @Transactional
     public DocumentoUsuarioResponse createDocumentoUsuario(DocumentoUsuarioRequest request) {
+        documentoService.findById(request.documentoId());
+        usuarioService.findById(request.usuarioId());
         return documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuarioRepository.save(documentoUsuarioMapper.toDocumentoUsuarioFromRequest(request)));
     }
 
