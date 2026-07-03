@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -26,6 +27,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "documentos")
+@SQLRestriction("deletado_em IS NULL")
 @Getter
 @Setter
 @AllArgsConstructor

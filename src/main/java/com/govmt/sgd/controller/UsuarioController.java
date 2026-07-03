@@ -18,6 +18,7 @@ import com.govmt.sgd.dto.request.UsuarioRequest;
 import com.govmt.sgd.dto.response.UsuarioResponse;
 import com.govmt.sgd.service.UsuarioService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,7 +29,7 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<UsuarioResponse> createUsuario(@RequestBody UsuarioRequest request) {
+    public ResponseEntity<UsuarioResponse> createUsuario(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.createUsuario(request));
     }
 
@@ -43,7 +44,7 @@ public class UsuarioController {
     }
 
     @PutMapping
-    public ResponseEntity<UsuarioResponse> update(@RequestBody UsuarioRequest request) {
+    public ResponseEntity<UsuarioResponse> update(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }
 

@@ -1,5 +1,6 @@
 package com.govmt.sgd.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +56,8 @@ public class DocumentoService {
 
     @Transactional
     public void deleteDocumento(UUID id) {
-        DocumentoResponse documentoResponse = findById(id);
-        documentoRepository.delete(documentoMapper.toDocumentoFromResponse(documentoResponse));
+        Documento documento = documentoRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
+        documento.setDeletadoEm(LocalDateTime.now());
     }
 }

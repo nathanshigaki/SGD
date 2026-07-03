@@ -18,6 +18,7 @@ import com.govmt.sgd.dto.request.DocumentoRequest;
 import com.govmt.sgd.dto.response.DocumentoResponse;
 import com.govmt.sgd.service.DocumentoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,7 +29,7 @@ public class DocumentoController {
     private final DocumentoService documentoService;
 
     @PostMapping
-    public ResponseEntity<DocumentoResponse> create(@RequestBody DocumentoRequest request) {
+    public ResponseEntity<DocumentoResponse> create(@Valid @RequestBody DocumentoRequest request) {
         DocumentoResponse response = documentoService.createDocumento(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -44,7 +45,7 @@ public class DocumentoController {
     }
 
     @PutMapping
-    public ResponseEntity<DocumentoResponse> update(@RequestBody DocumentoRequest request) {
+    public ResponseEntity<DocumentoResponse> update(@Valid @RequestBody DocumentoRequest request) {
         return ResponseEntity.ok(documentoService.updateDocumento(request));
     }
 

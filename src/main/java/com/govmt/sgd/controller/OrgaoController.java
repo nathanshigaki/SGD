@@ -17,6 +17,7 @@ import com.govmt.sgd.dto.request.OrgaoRequest;
 import com.govmt.sgd.dto.response.OrgaoResponse;
 import com.govmt.sgd.service.OrgaoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,7 +28,7 @@ public class OrgaoController {
     private final OrgaoService orgaoService;
 
     @PostMapping
-    public ResponseEntity<OrgaoResponse> create(@RequestBody OrgaoRequest request) {
+    public ResponseEntity<OrgaoResponse> create(@Valid @RequestBody OrgaoRequest request) {
         OrgaoResponse response = orgaoService.createOrgao(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

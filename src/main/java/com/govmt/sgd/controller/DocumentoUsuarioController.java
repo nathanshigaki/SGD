@@ -17,6 +17,7 @@ import com.govmt.sgd.dto.request.DocumentoUsuarioRequest;
 import com.govmt.sgd.dto.response.DocumentoUsuarioResponse;
 import com.govmt.sgd.service.DocumentoUsuarioService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,7 +28,7 @@ public class DocumentoUsuarioController {
     private final DocumentoUsuarioService documentoUsuarioService;
 
     @PostMapping
-    public ResponseEntity<DocumentoUsuarioResponse> create(@RequestBody DocumentoUsuarioRequest request) {
+    public ResponseEntity<DocumentoUsuarioResponse> create(@Valid @RequestBody DocumentoUsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(documentoUsuarioService.createDocumentoUsuario(request));
     }
 
