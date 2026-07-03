@@ -3,14 +3,18 @@ package com.govmt.sgd.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.UsuarioRequest;
 import com.govmt.sgd.dto.response.UsuarioResponse;
+import com.govmt.sgd.exception.InvalidArgumentException;
 import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.UsuarioMapper;
+import com.govmt.sgd.model.UserAuthenticated;
 import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.UsuarioRepository;
 
@@ -18,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UsuarioService {
+public class UsuarioService implements UserDetailsService{
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
@@ -26,6 +30,10 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponse createUsuario(UsuarioRequest usuarioRequest){
+        if (usuarioRepository.findByEmail(usuarioRequest.email()).isPresent()) {
+            throw new InvalidArgumentException("Este e-mail já está cadastrado no sistema.");
+        }
+        
         Usuario usuario = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
@@ -61,4 +69,13 @@ public class UsuarioService {
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
         usuarioRepository.delete(usuarioExiste);
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new NotFoundException("Usuário não encontrado")); //mudar excecao para notauthenticated
+
+        return new UserAuthenticated(usuario);
+    }
+
 }
