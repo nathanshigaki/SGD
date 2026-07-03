@@ -1,0 +1,5 @@
+CREATE TABLE feriados {
+  id UUID PRIMARY KEY,
+  data DATE,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+}

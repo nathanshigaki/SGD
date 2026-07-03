@@ -1,0 +1,22 @@
+CREATE TABLE documentos {
+  id UUID PRIMARY KEY,
+  orgao_id UUID,
+  sigdoc VARCHAR(255),
+  chegou_em DATE,
+  concluiu_em DATE,
+  em_espera INTEGER,
+  valor INTEGER,
+  situacao VARCHAR(255),
+  caracterizacao_ti VARCHAR(255),
+  inciado BOOLEAN,
+  condes BOOLEAN,
+  resumo TEXT,
+  tipo_contratacao VARCHAR(255),
+  objeto TEXT,
+  recomendacao VARCHAR(255),
+  parecer_final VARCHAR(255),
+  deletado_em TIMESTAMP DEFAULT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (orgao_id) REFERENCES orgaos(id)
+}
