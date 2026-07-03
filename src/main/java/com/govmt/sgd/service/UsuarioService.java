@@ -44,8 +44,8 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponse updateUsuario(UsuarioRequest usuarioRequest){
-        UsuarioResponse usuarioResponse = findById(usuarioRequest.id());
-        Usuario usuario = usuarioMapper.toUsuarioFromResponse(usuarioResponse);
+        Usuario usuario = usuarioRepository.findById(usuarioRequest.id())
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
         usuarioMapper.updateUsuarioFromRequest(usuarioRequest, usuario);
         return usuarioMapper.toResponseFromUsuario(usuario);
@@ -53,7 +53,8 @@ public class UsuarioService {
 
     @Transactional
     public void deleteUsuario(UUID id){
-        UsuarioResponse usuarioExiste = findById(id);
-        usuarioRepository.delete(usuarioMapper.toUsuarioFromResponse(usuarioExiste));
+        Usuario usuarioExiste = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+        usuarioRepository.delete(usuarioExiste);
     }
 }

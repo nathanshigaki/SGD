@@ -45,8 +45,8 @@ public class OrgaoService {
 
     @Transactional
     public OrgaoResponse updateOrgao(OrgaoRequest orgaoRequest){
-        OrgaoResponse orgaoResponse = findById(orgaoRequest.id());
-        Orgao orgao = orgaoMapper.toOrgaoFromResponse(orgaoResponse);
+        Orgao orgao = orgaoRepository.findById(orgaoRequest.id())
+                .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
 
         orgaoMapper.updateOrgaoFromRequest(orgaoRequest, orgao);
         return orgaoMapper.toResponseFromOrgao(orgao);
@@ -54,7 +54,8 @@ public class OrgaoService {
 
     @Transactional
     public void deleteOrgao(UUID id){
-        OrgaoResponse orgaoExiste = findById(id);
-        orgaoRepository.delete(orgaoMapper.toOrgaoFromResponse(orgaoExiste));
+        Orgao orgaoExiste = orgaoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
+        orgaoRepository.delete(orgaoExiste);
     }
 }

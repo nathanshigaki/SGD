@@ -48,8 +48,8 @@ public class DocumentoUsuarioService {
 
     @Transactional
     public DocumentoUsuarioResponse updateDocumentoUsuario(DocumentoUsuarioRequest request){
-        DocumentoUsuarioResponse response = findById(request.id());
-        DocumentoUsuario documentoUsuario = documentoUsuarioMapper.toDocumentoUsuarioFromResponse(response);
+        DocumentoUsuario documentoUsuario = documentoUsuarioRepository.findById(request.id())
+                .orElseThrow(() -> new NotFoundException("Atribuição não encontrada"));
 
         documentoUsuarioMapper.updateDocumentoUsuarioFromRequest(request, documentoUsuario);
         return documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario);
@@ -57,7 +57,8 @@ public class DocumentoUsuarioService {
 
     @Transactional
     public void deleteDocumentoUsuario(UUID id) {
-        DocumentoUsuarioResponse relacao = findById(id);
-        documentoUsuarioRepository.delete(documentoUsuarioMapper.toDocumentoUsuarioFromResponse(relacao));
+        DocumentoUsuario documentoUsuario = documentoUsuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Atribuição não encontrada"));
+        documentoUsuarioRepository.delete(documentoUsuario);
     }
 }

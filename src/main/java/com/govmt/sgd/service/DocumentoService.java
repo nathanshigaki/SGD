@@ -47,8 +47,8 @@ public class DocumentoService {
 
     @Transactional
     public DocumentoResponse updateDocumento(DocumentoRequest request) {
-        DocumentoResponse documentoResponse = findById(request.id());
-        Documento documento = documentoMapper.toDocumentoFromResponse(documentoResponse);
+        Documento documento = documentoRepository.findById(request.id())
+            .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
 
         documentoMapper.updateDocumentoFromRequest(request, documento);
         return documentoMapper.toResponseFromDocumento(documento);
