@@ -3,6 +3,7 @@ package com.govmt.sgd.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +22,13 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public UsuarioResponse createUsuario(UsuarioRequest usuarioRequest){
-        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuarioMapper.toUsuarioFromRequest(usuarioRequest)));
+        Usuario usuario = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
 
     @Transactional(readOnly = true)
