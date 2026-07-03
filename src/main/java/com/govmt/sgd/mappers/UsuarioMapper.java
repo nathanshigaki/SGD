@@ -14,6 +14,7 @@ public interface UsuarioMapper {
     Usuario toUsuarioFromRequest(UsuarioRequest request);
     UsuarioRequest toRequestFromUsuario(Usuario usuario);
     
+    @Mapping(target = "senha", ignore = true)
     Usuario toUsuarioFromResponse(UsuarioResponse response);
     UsuarioResponse toResponseFromUsuario(Usuario usuario);
 
