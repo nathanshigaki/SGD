@@ -8,4 +8,5 @@ import com.govmt.sgd.model.Orgao;
 
 public interface OrgaoRepository extends JpaRepository<Orgao, UUID> {
 
+    //filtrar por nome
 }

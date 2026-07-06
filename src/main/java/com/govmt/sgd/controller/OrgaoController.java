@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.OrgaoRequest;
-import com.govmt.sgd.dto.request.UsuarioRequest;
 import com.govmt.sgd.dto.response.OrgaoResponse;
-import com.govmt.sgd.dto.response.UsuarioResponse;
 import com.govmt.sgd.service.OrgaoService;
 
 import jakarta.validation.Valid;

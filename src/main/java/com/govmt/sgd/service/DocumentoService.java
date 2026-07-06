@@ -12,7 +12,6 @@ import com.govmt.sgd.dto.response.DocumentoResponse;
 import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.DocumentoMapper;
 import com.govmt.sgd.model.Documento;
-import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.DocumentoRepository;
 
 import lombok.RequiredArgsConstructor;

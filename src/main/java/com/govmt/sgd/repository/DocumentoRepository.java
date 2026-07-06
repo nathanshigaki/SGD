@@ -12,4 +12,10 @@ public interface DocumentoRepository extends JpaRepository<Documento, UUID> {
 
     @Query("SELECT d FROM Documento d LEFT JOIN FETCH d.orgao LEFT JOIN FETCH d.usuarios du LEFT JOIN FETCH du.usuario")
     List<Documento> findAllWithResponsaveis();
+
+    //filtrar por sigdoc
+    //filtrar por situacao
+    //filtrar por chegou_em
+    //filtrar por condes
+    //filtrar por parecer 
 }

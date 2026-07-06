@@ -22,6 +22,7 @@ public class HistoricoService {
         Historico historico = new Historico();
         historico.setDocumento(documento);
         historico.setUsuario(usuario);
+        historico.setAprovador(usuario);
         historico.setAcao(acao);
         historico.setValores(new ValoresHistorico(antes, depois));
         
