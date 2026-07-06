@@ -12,6 +12,7 @@ import com.govmt.sgd.dto.response.DocumentoResponse;
 import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.DocumentoMapper;
 import com.govmt.sgd.model.Documento;
+import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.DocumentoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,13 +22,26 @@ import lombok.RequiredArgsConstructor;
 public class DocumentoService {
 
     private final OrgaoService orgaoService;
+    private final UsuarioService usuarioService;
+    private final HistoricoService historicoService;
     private final DocumentoRepository documentoRepository;
     private final DocumentoMapper documentoMapper;
 
     @Transactional
     public DocumentoResponse createDocumento(DocumentoRequest request) {
         orgaoService.findById(request.orgaoId());
-        return documentoMapper.toResponseFromDocumento(documentoRepository.save(documentoMapper.toDocumentoFromRequest(request)));
+
+        Documento documento = documentoRepository.save(documentoMapper.toDocumentoFromRequest(request));
+        DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
+
+        historicoService.saveHistorico(
+            documento, 
+            usuarioService.getUsuarioLogado(), 
+            "CRIAR_DOCUMENTO", 
+            null,           
+            estadoDepois  
+        );
+        return estadoDepois;
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +64,18 @@ public class DocumentoService {
         Documento documento = documentoRepository.findById(request.id())
             .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
 
+        DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
         documentoMapper.updateDocumentoFromRequest(request, documento);
+        DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
+
+        historicoService.saveHistorico(
+            documento, 
+            usuarioService.getUsuarioLogado(), 
+            "ATUALIZAR_DOCUMENTO", 
+            estadoAntes, 
+            estadoDepois
+        );
+
         return documentoMapper.toResponseFromDocumento(documento);
     }
 
@@ -58,6 +83,15 @@ public class DocumentoService {
     public void deleteDocumento(UUID id) {
         Documento documento = documentoRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
-        documento.setDeletadoEm(LocalDateTime.now());
+
+        documento.setDeletadoEm(LocalDateTime.now()); //softdelete
+        DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
+        historicoService.saveHistorico(
+            documento, 
+            usuarioService.getUsuarioLogado(), 
+            "ATUALIZAR_DOCUMENTO", 
+            estadoAntes, 
+            estadoAntes // deletar ou continua igual?
+        );
     }
 }

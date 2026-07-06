@@ -7,10 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.DocumentoUsuarioRequest;
+import com.govmt.sgd.dto.response.DocumentoResponse;
 import com.govmt.sgd.dto.response.DocumentoUsuarioResponse;
 import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.DocumentoUsuarioMapper;
 import com.govmt.sgd.model.DocumentoUsuario;
+import com.govmt.sgd.model.Documento;
+import com.govmt.sgd.mappers.DocumentoMapper;
+import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.DocumentoUsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 public class DocumentoUsuarioService {
 
     private final UsuarioService usuarioService;
+    private final HistoricoService historicoService;
     private final DocumentoService documentoService;
+    private final DocumentoMapper documentoMapper;
     private final DocumentoUsuarioRepository documentoUsuarioRepository;
     private final DocumentoUsuarioMapper documentoUsuarioMapper;
 
@@ -28,7 +34,21 @@ public class DocumentoUsuarioService {
     public DocumentoUsuarioResponse createDocumentoUsuario(DocumentoUsuarioRequest request) {
         documentoService.findById(request.documentoId());
         usuarioService.findById(request.usuarioId());
-        return documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuarioRepository.save(documentoUsuarioMapper.toDocumentoUsuarioFromRequest(request)));
+
+        DocumentoUsuario documentoUsuario = documentoUsuarioRepository.save(documentoUsuarioMapper.toDocumentoUsuarioFromRequest(request));
+        DocumentoUsuarioResponse estadoDepois = documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario);
+
+        DocumentoResponse documentoResponse = documentoService.findById(request.documentoId());
+        Documento documento = documentoMapper.toDocumentoFromResponse(documentoResponse);
+
+        historicoService.saveHistorico(
+            documento, 
+            usuarioService.getUsuarioLogado(), 
+            "CRIAR_DOCUMENTO_USUARIO", 
+            null,           
+            estadoDepois  
+        );
+        return estadoDepois;
     }
 
     @Transactional(readOnly = true)
@@ -51,8 +71,20 @@ public class DocumentoUsuarioService {
         DocumentoUsuario documentoUsuario = documentoUsuarioRepository.findById(request.id())
                 .orElseThrow(() -> new NotFoundException("Atribuição não encontrada"));
 
+        DocumentoUsuarioResponse estadoAntes = documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario);
         documentoUsuarioMapper.updateDocumentoUsuarioFromRequest(request, documentoUsuario);
-        return documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario);
+        DocumentoUsuarioResponse estadoDepois = documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario);
+
+        usuarioService.getUsuarioLogado();
+        historicoService.saveHistorico(
+            documentoUsuario.getDocumento(), 
+            usuarioService.getUsuarioLogado(), 
+            "ATUALIZAR_DOCUMENTO_USUARIO", 
+            estadoAntes, 
+            estadoDepois  
+        );
+
+        return estadoDepois;
     }
 
     @Transactional
@@ -60,5 +92,13 @@ public class DocumentoUsuarioService {
         DocumentoUsuario documentoUsuario = documentoUsuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Atribuição não encontrada"));
         documentoUsuarioRepository.delete(documentoUsuario);
+
+        historicoService.saveHistorico(
+            documentoUsuario.getDocumento(), 
+            usuarioService.getUsuarioLogado(), 
+            "EXCLUIR_DOCUMENTO_USUARIO", 
+            documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario),           
+            null  
+        );
     }
 }

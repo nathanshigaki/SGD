@@ -28,6 +28,7 @@ public class UsuarioService implements UserDetailsService{
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final HistoricoService historicoService;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -38,7 +39,16 @@ public class UsuarioService implements UserDetailsService{
         
         Usuario usuario = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
+
+        UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
+        historicoService.saveHistorico(
+            null, 
+            getUsuarioLogado(), 
+            "CRIAR_USUARIO", 
+            null,           
+            estadoDepois  
+        );
+        return estadoDepois;
     }
 
     @Transactional(readOnly = true)
@@ -58,11 +68,25 @@ public class UsuarioService implements UserDetailsService{
 
     @Transactional
     public UsuarioResponse updateUsuario(UsuarioRequest usuarioRequest){
+        if(usuarioRequest.email() != getUsuarioLogado().getEmail()){
+            throw new InvalidArgumentException("Não é possível atualizar o outro usuário.");
+        }
+
         Usuario usuario = usuarioRepository.findById(usuarioRequest.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
+        UsuarioResponse estadoAntes = usuarioMapper.toResponseFromUsuario(usuario);
         usuarioMapper.updateUsuarioFromRequest(usuarioRequest, usuario);
-        return usuarioMapper.toResponseFromUsuario(usuario);
+        UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuario);
+
+        historicoService.saveHistorico(
+            null, 
+            getUsuarioLogado(), 
+            "ATUALIZAR_USUARIO", 
+            estadoAntes,           
+            estadoDepois  
+        );
+        return estadoDepois;
     }
 
     @Transactional
@@ -70,6 +94,14 @@ public class UsuarioService implements UserDetailsService{
         Usuario usuarioExiste = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
         usuarioRepository.delete(usuarioExiste);
+
+        historicoService.saveHistorico(
+            null, 
+            getUsuarioLogado(), 
+            "EXCLUIR_USUARIO", 
+            usuarioMapper.toResponseFromUsuario(usuarioExiste),           
+            null  
+        );
     }
 
     @Override

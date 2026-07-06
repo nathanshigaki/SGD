@@ -22,10 +22,22 @@ public class OrgaoService {
 
     private final OrgaoMapper orgaoMapper;
     private final OrgaoRepository orgaoRepository;
+    private final UsuarioService usuarioService;
+    private final HistoricoService historicoService;
 
     @Transactional
     public OrgaoResponse createOrgao(OrgaoRequest orgaoRequest){
-        return orgaoMapper.toResponseFromOrgao(orgaoRepository.save(orgaoMapper.toOrgaoFromRequest(orgaoRequest)));
+        OrgaoResponse estadoDepois = orgaoMapper.toResponseFromOrgao(orgaoRepository.save(orgaoMapper.toOrgaoFromRequest(orgaoRequest)));
+
+        historicoService.saveHistorico(
+            null, 
+            usuarioService.getUsuarioLogado(), 
+            "CRIAR_ORGAO", 
+            null,           
+            estadoDepois
+        );
+        
+        return estadoDepois;
     }
 
     @Transactional(readOnly = true)
@@ -48,8 +60,19 @@ public class OrgaoService {
         Orgao orgao = orgaoRepository.findById(orgaoRequest.id())
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
 
+        OrgaoResponse estadoAntes = orgaoMapper.toResponseFromOrgao(orgao);
         orgaoMapper.updateOrgaoFromRequest(orgaoRequest, orgao);
-        return orgaoMapper.toResponseFromOrgao(orgao);
+        OrgaoResponse estadoDepois = orgaoMapper.toResponseFromOrgao(orgao);
+
+        historicoService.saveHistorico(
+            null, 
+            usuarioService.getUsuarioLogado(), 
+            "ATUALIZAR_ORGAO", 
+            estadoAntes,           
+            estadoDepois
+        );
+
+        return estadoDepois;
     }
 
     @Transactional
@@ -57,5 +80,13 @@ public class OrgaoService {
         Orgao orgaoExiste = orgaoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
         orgaoRepository.delete(orgaoExiste);
+
+        historicoService.saveHistorico(
+            null, 
+            usuarioService.getUsuarioLogado(), 
+            "EXCLUIR_ORGAO", 
+            orgaoMapper.toResponseFromOrgao(orgaoExiste),           
+            null  
+        );
     }
 }
