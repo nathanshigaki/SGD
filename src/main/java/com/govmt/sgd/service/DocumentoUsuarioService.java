@@ -7,14 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.DocumentoUsuarioRequest;
-import com.govmt.sgd.dto.response.DocumentoResponse;
 import com.govmt.sgd.dto.response.DocumentoUsuarioResponse;
 import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.DocumentoUsuarioMapper;
 import com.govmt.sgd.model.DocumentoUsuario;
 import com.govmt.sgd.model.Documento;
-import com.govmt.sgd.mappers.DocumentoMapper;
-import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.DocumentoUsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,7 +23,6 @@ public class DocumentoUsuarioService {
     private final UsuarioService usuarioService;
     private final HistoricoService historicoService;
     private final DocumentoService documentoService;
-    private final DocumentoMapper documentoMapper;
     private final DocumentoUsuarioRepository documentoUsuarioRepository;
     private final DocumentoUsuarioMapper documentoUsuarioMapper;
 
@@ -38,8 +34,7 @@ public class DocumentoUsuarioService {
         DocumentoUsuario documentoUsuario = documentoUsuarioRepository.save(documentoUsuarioMapper.toDocumentoUsuarioFromRequest(request));
         DocumentoUsuarioResponse estadoDepois = documentoUsuarioMapper.toResponseFromDocumentoUsuario(documentoUsuario);
 
-        DocumentoResponse documentoResponse = documentoService.findById(request.documentoId());
-        Documento documento = documentoMapper.toDocumentoFromResponse(documentoResponse);
+        Documento documento = documentoUsuario.getDocumento();
 
         historicoService.saveHistorico(
             documento, 

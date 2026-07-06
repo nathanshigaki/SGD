@@ -84,14 +84,15 @@ public class DocumentoService {
         Documento documento = documentoRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
 
-        documento.setDeletadoEm(LocalDateTime.now()); //softdelete
         DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
+        documento.setDeletadoEm(LocalDateTime.now()); //softdelete
+        DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
         historicoService.saveHistorico(
             documento, 
             usuarioService.getUsuarioLogado(), 
             "ATUALIZAR_DOCUMENTO", 
             estadoAntes, 
-            estadoAntes // deletar ou continua igual?
+            estadoDepois // deletar ou continua igual?
         );
     }
 }
