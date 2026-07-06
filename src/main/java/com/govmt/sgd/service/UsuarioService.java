@@ -3,6 +3,8 @@ package com.govmt.sgd.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -78,4 +80,11 @@ public class UsuarioService implements UserDetailsService{
         return new UserAuthenticated(usuario);
     }
 
+    public Usuario getUsuarioLogado(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // O JWT username foi gerado com email no UserAuthenticated.java
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Utilizador autenticado não encontrado"));
+    }
+    
 }

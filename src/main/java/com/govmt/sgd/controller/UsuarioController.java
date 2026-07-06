@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,26 +30,31 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CRIAR_USUARIO')")
     public ResponseEntity<UsuarioResponse> createUsuario(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.createUsuario(request));
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('LER_USUARIO')")
     public ResponseEntity<List<UsuarioResponse>> getAllUsuarios() {
         return ResponseEntity.ok(usuarioService.getAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('LER_USUARIO')")
     public ResponseEntity<UsuarioResponse> findUsuarioById(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('ATUALIZAR_USUARIO')")
     public ResponseEntity<UsuarioResponse> update(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('EXCLUIR_USUARIO')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         usuarioService.deleteUsuario(id);
         return ResponseEntity.noContent().build();
