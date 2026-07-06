@@ -32,33 +32,33 @@ public class OrgaoController {
     private final OrgaoService orgaoService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CRIAR_ORGAO')")
+    @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<OrgaoResponse> create(@Valid @RequestBody OrgaoRequest request) {
         OrgaoResponse response = orgaoService.createOrgao(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('LER_ORGAO')")
+    @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<List<OrgaoResponse>> getAll() {
         return ResponseEntity.ok(orgaoService.getAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('LER_ORGAO')")
+    @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<OrgaoResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(orgaoService.findById(id));
     }
 
     @PutMapping
-    @PreAuthorize("hasAuthority('ATUALIZAR_ORGAO')")
+    @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<OrgaoResponse> update(@Valid @RequestBody OrgaoRequest request) {
         return ResponseEntity.ok(orgaoService.updateOrgao(request));
     }
 
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('EXCLUIR_ORGAO')")
+    @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         orgaoService.deleteOrgao(id);
         return ResponseEntity.noContent().build();

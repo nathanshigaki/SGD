@@ -39,6 +39,8 @@ public class DocumentoUsuario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
+
+    @Column(name = "cargo")
     private String cargo;
 
     @CreationTimestamp

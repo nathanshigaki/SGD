@@ -30,31 +30,31 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CRIAR_USUARIO')")
+    @PreAuthorize("hasAuthority('USUARIO:CRIAR')")
     public ResponseEntity<UsuarioResponse> createUsuario(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.createUsuario(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('LER_USUARIO')")
+    @PreAuthorize("hasAuthority('USUARIO:LER')")
     public ResponseEntity<List<UsuarioResponse>> getAllUsuarios() {
         return ResponseEntity.ok(usuarioService.getAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('LER_USUARIO')")
+    @PreAuthorize("hasAuthority('USUARIO:LER')")
     public ResponseEntity<UsuarioResponse> findUsuarioById(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }
 
     @PutMapping
-    @PreAuthorize("hasAuthority('ATUALIZAR_USUARIO')")
+    @PreAuthorize("hasAuthority('USUARIO:ATUALIZAR')")
     public ResponseEntity<UsuarioResponse> update(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('EXCLUIR_USUARIO')")
+    @PreAuthorize("hasAuthority('USUARIO:EXCLUIR')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         usuarioService.deleteUsuario(id);
         return ResponseEntity.noContent().build();

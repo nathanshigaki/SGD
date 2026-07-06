@@ -30,32 +30,32 @@ public class DocumentoController {
     private final DocumentoService documentoService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CRIAR_DOCUMENTO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:CRIAR')")
     public ResponseEntity<DocumentoResponse> create(@Valid @RequestBody DocumentoRequest request) {
         DocumentoResponse response = documentoService.createDocumento(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('LER_DOCUMENTO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:LER')")
     public ResponseEntity<List<DocumentoResponse>> getAll() {
         return ResponseEntity.ok(documentoService.getAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('LER_DOCUMENTO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:LER')")
     public ResponseEntity<DocumentoResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(documentoService.findById(id));
     }
 
     @PutMapping
-    @PreAuthorize("hasAuthority('ATUALIZAR_DOCUMENTO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:ATUALIZAR')")
     public ResponseEntity<DocumentoResponse> update(@Valid @RequestBody DocumentoRequest request) {
         return ResponseEntity.ok(documentoService.updateDocumento(request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('EXCLUIR_DOCUMENTO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:EXCLUIR')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         documentoService.deleteDocumento(id);
         return ResponseEntity.noContent().build();

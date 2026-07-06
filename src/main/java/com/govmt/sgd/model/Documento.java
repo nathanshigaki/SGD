@@ -59,6 +59,8 @@ public class Documento {
 
     @Column(precision = 15, scale = 2)
     private BigDecimal valor;  
+
+    @Column(name = "situacao")
     private String situacao;
     
     @Column(name = "caracterizacao_ti")

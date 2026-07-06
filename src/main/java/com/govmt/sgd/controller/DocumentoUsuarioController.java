@@ -29,25 +29,25 @@ public class DocumentoUsuarioController {
     private final DocumentoUsuarioService documentoUsuarioService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CRIAR_DOCUMENTO_USUARIO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO_USUARIO:CRIAR')")
     public ResponseEntity<DocumentoUsuarioResponse> create(@Valid @RequestBody DocumentoUsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(documentoUsuarioService.createDocumentoUsuario(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('LER_DOCUMENTO_USUARIO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO_USUARIO:LER')")
     public ResponseEntity<List<DocumentoUsuarioResponse>> getAll() {
         return ResponseEntity.ok(documentoUsuarioService.getAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('LER_DOCUMENTO_USUARIO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO_USUARIO:LER')")
     public ResponseEntity<DocumentoUsuarioResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(documentoUsuarioService.findById(id));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('EXCLUIR_DOCUMENTO_USUARIO')")
+    @PreAuthorize("hasAuthority('DOCUMENTO_USUARIO:EXCLUIR')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         documentoUsuarioService.deleteDocumentoUsuario(id);
         return ResponseEntity.noContent().build();
