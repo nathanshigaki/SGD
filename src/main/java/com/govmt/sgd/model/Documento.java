@@ -2,7 +2,6 @@ package com.govmt.sgd.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,10 +48,10 @@ public class Documento {
     private String sigdoc; 
 
     @Column(name = "chegou_em")
-    private Date chegouEm;  
+    private LocalDateTime chegouEm;  
 
     @Column(name = "concluiu_em")
-    private Date concluiuEm;   
+    private LocalDateTime concluiuEm;   
 
     @Column(name = "em_espera")
     private int emEspera;

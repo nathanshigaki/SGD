@@ -43,7 +43,7 @@ public class UsuarioService implements UserDetailsService{
         UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
         historicoService.saveHistorico(
             null, 
-            getUsuarioLogado(), 
+            getUsuarioLogado(), // O usuário logado é o que está criando o novo usuário
             "CRIAR_USUARIO", 
             null,           
             estadoDepois  

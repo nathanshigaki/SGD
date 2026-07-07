@@ -2,7 +2,6 @@ package com.govmt.sgd.dto.request;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
@@ -21,8 +20,8 @@ public record DocumentoRequest(
         message = "O formato deve ser XXX-XXX-0000/00000"
     )
     String sigdoc, 
-    Date chegouEm,  
-    Date concluiuEm,   
+    LocalDateTime chegouEm,  
+    LocalDateTime concluiuEm,   
     int emEspera,
     BigDecimal valor,  
     String situacao,

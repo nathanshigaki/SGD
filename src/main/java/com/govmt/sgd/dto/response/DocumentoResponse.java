@@ -2,7 +2,6 @@ package com.govmt.sgd.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,8 +11,8 @@ public record DocumentoResponse(
     OrgaoResponse orgao,
     List<DocumentoResponsavelResponse> responsaveis,
     String sigdoc, 
-    Date chegouEm,  
-    Date concluiuEm,   
+    LocalDateTime chegouEm,  
+    LocalDateTime concluiuEm,   
     int emEspera,
     BigDecimal valor,  
     String situacao,

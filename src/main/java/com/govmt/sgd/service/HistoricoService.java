@@ -22,7 +22,10 @@ public class HistoricoService {
         Historico historico = new Historico();
         historico.setDocumento(documento);
         historico.setUsuario(usuario);
-        historico.setAprovador(usuario);
+        historico.setAprovador(null);
+        //adicionar no documentoService o metodo para pegar o id do jwt q vai ser o aprovador, 
+        //adicionar a condição do aprovador para aprovar as mudanças e assim mudar as coisas, enquanto n tiver deixar pre salvo para o aprovador aprovar.
+
         historico.setAcao(acao);
         historico.setValores(new ValoresHistorico(antes, depois));
         

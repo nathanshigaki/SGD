@@ -75,7 +75,7 @@ public class DocumentoService {
             estadoDepois
         );
 
-        return documentoMapper.toResponseFromDocumento(documento);
+        return estadoDepois;
     }
 
     @Transactional
