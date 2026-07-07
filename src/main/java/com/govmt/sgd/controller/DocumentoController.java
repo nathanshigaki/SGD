@@ -1,8 +1,12 @@
 package com.govmt.sgd.controller;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.DocumentoRequest;
@@ -38,8 +43,23 @@ public class DocumentoController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('DOCUMENTO:LER')")
-    public ResponseEntity<List<DocumentoResponse>> getAll() {
-        return ResponseEntity.ok(documentoService.getAll());
+    public ResponseEntity<Page<DocumentoResponse>> getAll(
+        @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(documentoService.getAll(pageable));
+    }
+
+    @GetMapping("/buscar")
+    @PreAuthorize("hasAuthority('LER_DOCUMENTO')")
+    public ResponseEntity<Page<DocumentoResponse>> buscarComFiltros(
+            @RequestParam(required = false) String sigdoc,
+            @RequestParam(required = false) String situacao,
+            @RequestParam(required = false) LocalDateTime chegouEm,
+            @RequestParam(required = false) Boolean condes,
+            @RequestParam(required = false) String parecerFinal,
+            @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        return ResponseEntity.ok(documentoService.buscarComFiltros(sigdoc, situacao, chegouEm, condes, parecerFinal, pageable));
     }
 
     @GetMapping("/{id}")

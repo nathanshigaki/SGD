@@ -1,9 +1,10 @@
 package com.govmt.sgd.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +45,21 @@ public class DocumentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<DocumentoResponse> getAll() {
-        return documentoRepository.findAllWithResponsaveis()
-                .stream()
-                .map(documentoMapper::toResponseFromDocumento)
-                .toList();
+    public Page<DocumentoResponse> getAll(Pageable pageable) {
+        return documentoRepository.findAllWithResponsaveis(pageable)
+                .map(documentoMapper::toResponseFromDocumento);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<DocumentoResponse> buscarComFiltros( 
+            String sigdoc, 
+            String situacao, 
+            LocalDateTime chegouEm, 
+            Boolean condes, 
+            String parecerFinal, 
+            Pageable pageable) {
+        return documentoRepository.buscarComFiltros(sigdoc, situacao, chegouEm, condes, parecerFinal, pageable)
+                .map(documentoMapper::toResponseFromDocumento);
     }
 
     @Transactional(readOnly = true)
