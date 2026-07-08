@@ -19,47 +19,114 @@ import com.govmt.sgd.dto.request.UsuarioRequest;
 import com.govmt.sgd.dto.response.UsuarioResponse;
 import com.govmt.sgd.service.UsuarioService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/usuarios")
 @RequiredArgsConstructor
+@Tag(name = "Usuários", description = "Operações de cadastro, gerenciamento de contas e controle de permissões de acesso")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
     @PostMapping
+    @Operation(
+        summary = "Cadastrar novo usuário",
+        description = "Registra uma nova conta de usuário no sistema."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Usuário cadastrado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados de requisição inválidos ou e-mail já existente"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
+    })
     @PreAuthorize("hasAuthority('USUARIO:CRIAR')")
     public ResponseEntity<UsuarioResponse> createUsuario(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.createUsuario(request));
     }
 
     @GetMapping
+    @Operation(
+        summary = "Listar todos os usuários",
+        description = "Retorna a listagem completa de contas cadastradas (Sem paginação)."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Listagem de usuários retornada com sucesso"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
     @PreAuthorize("hasAuthority('USUARIO:LER')")
     public ResponseEntity<List<UsuarioResponse>> getAllUsuarios() {
         return ResponseEntity.ok(usuarioService.getAll());
     }
 
     @GetMapping("/{id}")
+    @Operation(
+        summary = "Buscar usuário por ID",
+        description = "Recupera os detalhes do perfil de um usuário específico."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado na base de dados")
+    })
     @PreAuthorize("hasAuthority('USUARIO:LER')")
     public ResponseEntity<UsuarioResponse> findUsuarioById(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }
 
     @PutMapping
+    @Operation(
+        summary = "Atualizar dados do usuário",
+        description = "Atualiza as informações pessoais e cadastrais de um usuário."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Dados do usuário atualizados com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos na requisição"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
     @PreAuthorize("hasAuthority('USUARIO:ATUALIZAR')")
     public ResponseEntity<UsuarioResponse> update(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }
 
     @PutMapping("/{id}/permissoes")
+    @Operation(
+        summary = "Atualizar permissões (Exclusivo Admin)",
+        description = "Substitui a lista de permissões e cargos (Authorities) de um usuário específico."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Permissões concedidas/atualizadas com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Corpo da requisição inválido (Lista de permissões mal formatada)"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - Operação exclusiva para administradores"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
     @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<UsuarioResponse> updatePermissoes(@PathVariable UUID id, @Valid @RequestBody List<String> permissoes) {
         return ResponseEntity.ok(usuarioService.updatePermissoes(id, permissoes));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+        summary = "Excluir conta de usuário",
+        description = "Remove fisicamente o registro de um usuário. Ação irreversível."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Usuário excluído com sucesso (No Content)"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro de integridade (Ex: Usuário está atrelado ao histórico ou a documentos)")
+    })
     @PreAuthorize("hasAuthority('USUARIO:EXCLUIR')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         usuarioService.deleteUsuario(id);

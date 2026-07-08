@@ -49,6 +49,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/login").permitAll() // Rota de login pública
                 .requestMatchers(HttpMethod.POST, "/usuarios").permitAll() // Rota para criar usuário pública
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Rota do swagger
                 .anyRequest().authenticated() // Todas as outras exigem token
             )
             .oauth2ResourceServer(conf -> conf.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))); 

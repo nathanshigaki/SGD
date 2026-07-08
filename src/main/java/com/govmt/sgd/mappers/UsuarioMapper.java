@@ -11,6 +11,7 @@ import com.govmt.sgd.model.Usuario;
 @Mapper(componentModel = "spring")
 public interface UsuarioMapper {
 
+    @Mapping(target = "permissao", ignore = true)
     Usuario toUsuarioFromRequest(UsuarioRequest request);
     UsuarioRequest toRequestFromUsuario(Usuario usuario);
     
