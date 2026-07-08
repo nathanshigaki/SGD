@@ -1,8 +1,9 @@
 package com.govmt.sgd.service;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,11 +48,20 @@ public class DocumentoUsuarioService {
     }
 
     @Transactional(readOnly = true)
-    public List<DocumentoUsuarioResponse> getAll() {
-        return documentoUsuarioRepository.findAll()
-                .stream()
-                .map(documentoUsuarioMapper::toResponseFromDocumentoUsuario)
-                .toList();
+    public Page<DocumentoUsuarioResponse> getAll(Pageable pageable) {
+        return documentoUsuarioRepository.findAll(pageable)
+                .map(documentoUsuarioMapper::toResponseFromDocumentoUsuario);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<DocumentoUsuarioResponse> buscarComFiltros(
+        UUID documentoId,
+        UUID usuarioId,
+        String cargo,
+        Pageable pageable
+    ){
+        return documentoUsuarioRepository.buscarComFiltros(documentoId, usuarioId, cargo, pageable)
+                .map(documentoUsuarioMapper::toResponseFromDocumentoUsuario);
     }
 
     @Transactional(readOnly = true)

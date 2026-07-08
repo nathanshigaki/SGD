@@ -1,7 +1,11 @@
 package com.govmt.sgd.controller;
 
-import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.DocumentoUsuarioRequest;
@@ -36,8 +41,21 @@ public class DocumentoUsuarioController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('DOCUMENTO_USUARIO:LER')")
-    public ResponseEntity<List<DocumentoUsuarioResponse>> getAll() {
-        return ResponseEntity.ok(documentoUsuarioService.getAll());
+    public ResponseEntity<Page<DocumentoUsuarioResponse>> getAll(
+        @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(documentoUsuarioService.getAll(pageable));
+    }
+
+    @GetMapping("/buscar")
+    @PreAuthorize("hasAuthority('LER_DOCUMENTO')")
+    public ResponseEntity<Page<DocumentoUsuarioResponse>> buscarComFiltros(
+            @RequestParam(required = false) UUID documentoId,
+            @RequestParam(required = false) UUID usuarioId,
+            @RequestParam(required = false) String cargo,
+            @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        return ResponseEntity.ok(documentoUsuarioService.buscarComFiltros(documentoId, usuarioId, cargo, pageable));
     }
 
     @GetMapping("/{id}")
