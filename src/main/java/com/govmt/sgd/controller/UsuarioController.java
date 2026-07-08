@@ -53,6 +53,12 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }
 
+    @PutMapping("/{id}/permissoes")
+    @PreAuthorize("hasAuthority('*:*')")
+    public ResponseEntity<UsuarioResponse> updatePermissoes(@PathVariable UUID id, @Valid @RequestBody List<String> permissoes) {
+        return ResponseEntity.ok(usuarioService.updatePermissoes(id, permissoes));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('USUARIO:EXCLUIR')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {

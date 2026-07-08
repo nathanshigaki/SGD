@@ -39,8 +39,10 @@ public class UsuarioService implements UserDetailsService{
         
         Usuario usuario = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        usuario.setPermissao(List.of("LER_DOCUMENTO"));
 
         UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
+
         historicoService.saveHistorico(
             null, 
             getUsuarioLogado(), // O usuário logado é o que está criando o novo usuário
@@ -86,6 +88,26 @@ public class UsuarioService implements UserDetailsService{
             estadoAntes,           
             estadoDepois  
         );
+        return estadoDepois;
+    }
+
+    @Transactional
+    public UsuarioResponse updatePermissoes(UUID id, List<String> novasPermissoes) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+
+        UsuarioResponse estadoAntes = usuarioMapper.toResponseFromUsuario(usuario);
+        usuario.setPermissao(novasPermissoes);
+        UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
+
+        historicoService.saveHistorico(
+            null, 
+            getUsuarioLogado(), 
+            "ALTERAR_PERMISSOES_USUARIO", 
+            estadoAntes, 
+            estadoDepois
+        );
+
         return estadoDepois;
     }
 
