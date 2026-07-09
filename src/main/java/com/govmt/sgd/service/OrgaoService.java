@@ -3,6 +3,7 @@ package com.govmt.sgd.service;
 import com.govmt.sgd.mappers.OrgaoMapper;
 import com.govmt.sgd.model.Orgao;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,12 +82,15 @@ public class OrgaoService {
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
         orgaoRepository.delete(orgaoExiste);
 
+        OrgaoResponse estadoAntes = orgaoMapper.toResponseFromOrgao(orgaoExiste);
+        orgaoExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
+        OrgaoResponse estadoDepois = orgaoMapper.toResponseFromOrgao(orgaoExiste);
         historicoService.saveHistorico(
             null, 
             usuarioService.getUsuarioLogado(), 
-            "EXCLUIR_ORGAO", 
-            orgaoMapper.toResponseFromOrgao(orgaoExiste),           
-            null  
+            "ATUALIZAR_DOCUMENTO", 
+            estadoAntes, 
+            estadoDepois 
         );
     }
 }

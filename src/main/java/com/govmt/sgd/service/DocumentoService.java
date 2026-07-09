@@ -102,7 +102,7 @@ public class DocumentoService {
             usuarioService.getUsuarioLogado(), 
             "ATUALIZAR_DOCUMENTO", 
             estadoAntes, 
-            estadoDepois // deletar ou continua igual?
+            estadoDepois 
         );
     }
 }

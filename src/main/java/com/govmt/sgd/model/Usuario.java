@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.CollectionTable;
@@ -24,6 +25,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "usuarios")
+@SQLRestriction("deletado_em IS NULL")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -55,4 +57,7 @@ public class Usuario {
     @UpdateTimestamp
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
+
+    @Column(name = "deletado_em")
+    private LocalDateTime deletadoEm;
 }

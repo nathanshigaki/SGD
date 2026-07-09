@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -19,6 +20,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "orgao")
+@SQLRestriction("deletado_em IS NULL")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -43,4 +45,6 @@ public class Orgao {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
 
+    @Column(name = "deletado_em")
+    private LocalDateTime deletadoEm;
 }
