@@ -3,6 +3,8 @@ package com.govmt.sgd.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,11 +56,9 @@ public class UsuarioService implements UserDetailsService{
     }
 
     @Transactional(readOnly = true)
-    public List<UsuarioResponse> getAll(){
-        return usuarioRepository.findAll()
-                .stream()
-                .map(usuarioMapper::toResponseFromUsuario)
-                .toList();
+    public Page<UsuarioResponse> getAll(Pageable pageable){
+        return usuarioRepository.findAll(pageable)
+                .map(usuarioMapper::toResponseFromUsuario);
     }
 
     @Transactional(readOnly = true)

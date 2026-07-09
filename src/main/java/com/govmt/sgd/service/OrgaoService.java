@@ -4,9 +4,10 @@ import com.govmt.sgd.mappers.OrgaoMapper;
 import com.govmt.sgd.model.Orgao;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,11 +43,9 @@ public class OrgaoService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrgaoResponse> getAll(){
-        return orgaoRepository.findAll()
-                .stream()
-                .map(orgaoMapper::toResponseFromOrgao)
-                .toList();
+    public Page<OrgaoResponse> getAll(Pageable pageble){
+        return orgaoRepository.findAll(pageble)
+                .map(orgaoMapper::toResponseFromOrgao);
     }
 
     @Transactional(readOnly = true)

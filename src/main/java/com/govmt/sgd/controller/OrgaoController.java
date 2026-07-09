@@ -1,8 +1,11 @@
 package com.govmt.sgd.controller;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +23,7 @@ import com.govmt.sgd.dto.response.OrgaoResponse;
 import com.govmt.sgd.service.OrgaoService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,8 +66,11 @@ public class OrgaoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     @PreAuthorize("hasAuthority('*:*')")
-    public ResponseEntity<List<OrgaoResponse>> getAll() {
-        return ResponseEntity.ok(orgaoService.getAll());
+    public ResponseEntity<Page<OrgaoResponse>> getAll(
+        @Parameter(hidden = true)
+        @PageableDefault(size = 10, page = 0, sort = "nome", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(orgaoService.getAll(pageable));
     }
 
     @GetMapping("/{id}")

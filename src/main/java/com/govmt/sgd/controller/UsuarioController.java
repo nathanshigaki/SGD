@@ -3,6 +3,10 @@ package com.govmt.sgd.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +24,7 @@ import com.govmt.sgd.dto.response.UsuarioResponse;
 import com.govmt.sgd.service.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,8 +66,11 @@ public class UsuarioController {
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     @PreAuthorize("hasAuthority('USUARIO:LER')")
-    public ResponseEntity<List<UsuarioResponse>> getAllUsuarios() {
-        return ResponseEntity.ok(usuarioService.getAll());
+    public ResponseEntity<Page<UsuarioResponse>> getAllUsuarios(
+        @Parameter(hidden = true)
+        @PageableDefault(size = 10, page = 0, sort = "nome", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(usuarioService.getAll(pageable));
     }
 
     @GetMapping("/{id}")
