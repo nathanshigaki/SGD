@@ -24,22 +24,10 @@ public class OrgaoService {
 
     private final OrgaoMapper orgaoMapper;
     private final OrgaoRepository orgaoRepository;
-    private final UsuarioService usuarioService;
-    private final HistoricoService historicoService;
 
     @Transactional
     public OrgaoResponse createOrgao(OrgaoRequest orgaoRequest){
-        OrgaoResponse estadoDepois = orgaoMapper.toResponseFromOrgao(orgaoRepository.save(orgaoMapper.toOrgaoFromRequest(orgaoRequest)));
-
-        historicoService.saveHistorico(
-            null, 
-            usuarioService.getUsuarioLogado(), 
-            "CRIAR_ORGAO", 
-            null,           
-            estadoDepois
-        );
-        
-        return estadoDepois;
+        return orgaoMapper.toResponseFromOrgao(orgaoRepository.save(orgaoMapper.toOrgaoFromRequest(orgaoRequest)));
     }
 
     @Transactional(readOnly = true)
@@ -60,36 +48,15 @@ public class OrgaoService {
         Orgao orgao = orgaoRepository.findById(orgaoRequest.id())
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
 
-        OrgaoResponse estadoAntes = orgaoMapper.toResponseFromOrgao(orgao);
         orgaoMapper.updateOrgaoFromRequest(orgaoRequest, orgao);
-        OrgaoResponse estadoDepois = orgaoMapper.toResponseFromOrgao(orgao);
 
-        historicoService.saveHistorico(
-            null, 
-            usuarioService.getUsuarioLogado(), 
-            "ATUALIZAR_ORGAO", 
-            estadoAntes,           
-            estadoDepois
-        );
-
-        return estadoDepois;
+        return orgaoMapper.toResponseFromOrgao(orgao);
     }
 
     @Transactional
     public void deleteOrgao(UUID id){
         Orgao orgaoExiste = orgaoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
-        orgaoRepository.delete(orgaoExiste);
-
-        OrgaoResponse estadoAntes = orgaoMapper.toResponseFromOrgao(orgaoExiste);
         orgaoExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
-        OrgaoResponse estadoDepois = orgaoMapper.toResponseFromOrgao(orgaoExiste);
-        historicoService.saveHistorico(
-            null, 
-            usuarioService.getUsuarioLogado(), 
-            "ATUALIZAR_DOCUMENTO", 
-            estadoAntes, 
-            estadoDepois 
-        );
     }
 }

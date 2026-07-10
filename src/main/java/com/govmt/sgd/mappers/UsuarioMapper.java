@@ -12,10 +12,12 @@ import com.govmt.sgd.model.Usuario;
 public interface UsuarioMapper {
 
     @Mapping(target = "permissao", ignore = true)
+    @Mapping(target = "deletadoEm", ignore = true)
     Usuario toUsuarioFromRequest(UsuarioRequest request);
     UsuarioRequest toRequestFromUsuario(Usuario usuario);
     
     @Mapping(target = "senha", ignore = true)
+    @Mapping(target = "deletadoEm", ignore = true)
     Usuario toUsuarioFromResponse(UsuarioResponse response);
     UsuarioResponse toResponseFromUsuario(Usuario usuario);
 
@@ -25,5 +27,6 @@ public interface UsuarioMapper {
     @Mapping(target = "permissao", ignore = true)
     @Mapping(target = "criadoEm", ignore = true)
     @Mapping(target = "atualizadoEm", ignore = true)
+    @Mapping(target = "deletadoEm", ignore = true)
     void updateUsuarioFromRequest(UsuarioRequest request, @MappingTarget Usuario entity);
 }

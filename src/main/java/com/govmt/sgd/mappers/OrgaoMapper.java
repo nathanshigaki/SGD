@@ -11,15 +11,18 @@ import com.govmt.sgd.model.Orgao;
 @Mapper(componentModel = "spring")
 public interface OrgaoMapper {
 
+    @Mapping(target = "deletadoEm", ignore = true)
     Orgao toOrgaoFromRequest(OrgaoRequest request);
     OrgaoRequest toRequestFromOrgao(Orgao orgao);
     
+    @Mapping(target = "deletadoEm", ignore = true)
     Orgao toOrgaoFromResponse(OrgaoResponse response);
     OrgaoResponse toResponseFromOrgao(Orgao orgao);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "criadoEm", ignore = true)
     @Mapping(target = "atualizadoEm", ignore = true)
+    @Mapping(target = "deletadoEm", ignore = true)
     void updateOrgaoFromRequest(OrgaoRequest request, @MappingTarget Orgao entity);
 
 }

@@ -1,5 +1,6 @@
 package com.govmt.sgd.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +31,6 @@ public class UsuarioService implements UserDetailsService{
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
-    private final HistoricoService historicoService;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -43,16 +43,7 @@ public class UsuarioService implements UserDetailsService{
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuario.setPermissao(List.of("LER_DOCUMENTO"));
 
-        UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
-
-        historicoService.saveHistorico(
-            null, 
-            getUsuarioLogado(), // O usuário logado é o que está criando o novo usuário
-            "CRIAR_USUARIO", 
-            null,           
-            estadoDepois  
-        );
-        return estadoDepois;
+        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
 
     @Transactional(readOnly = true)
@@ -77,18 +68,9 @@ public class UsuarioService implements UserDetailsService{
         Usuario usuario = usuarioRepository.findById(usuarioRequest.id())
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
-        UsuarioResponse estadoAntes = usuarioMapper.toResponseFromUsuario(usuario);
         usuarioMapper.updateUsuarioFromRequest(usuarioRequest, usuario);
-        UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuario);
 
-        historicoService.saveHistorico(
-            null, 
-            getUsuarioLogado(), 
-            "ATUALIZAR_USUARIO", 
-            estadoAntes,           
-            estadoDepois  
-        );
-        return estadoDepois;
+        return usuarioMapper.toResponseFromUsuario(usuario);
     }
 
     @Transactional
@@ -96,34 +78,16 @@ public class UsuarioService implements UserDetailsService{
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
-        UsuarioResponse estadoAntes = usuarioMapper.toResponseFromUsuario(usuario);
         usuario.setPermissao(novasPermissoes);
-        UsuarioResponse estadoDepois = usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
 
-        historicoService.saveHistorico(
-            null, 
-            getUsuarioLogado(), 
-            "ALTERAR_PERMISSOES_USUARIO", 
-            estadoAntes, 
-            estadoDepois
-        );
-
-        return estadoDepois;
+        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
 
     @Transactional
     public void deleteUsuario(UUID id){
         Usuario usuarioExiste = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
-        usuarioRepository.delete(usuarioExiste);
-
-        historicoService.saveHistorico(
-            null, 
-            getUsuarioLogado(), 
-            "EXCLUIR_USUARIO", 
-            usuarioMapper.toResponseFromUsuario(usuarioExiste),           
-            null  
-        );
+        usuarioExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
     }
 
     @Override
