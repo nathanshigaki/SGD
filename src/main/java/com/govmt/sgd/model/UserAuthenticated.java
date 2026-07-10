@@ -48,6 +48,6 @@ public class UserAuthenticated implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return usuario.getPermissoes() != null && usuario.getPermissoes().contains("CONTA:ATIVA");
     }
 }
