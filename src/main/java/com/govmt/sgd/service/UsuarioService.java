@@ -41,7 +41,7 @@ public class UsuarioService implements UserDetailsService{
         
         Usuario usuario = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuario.setPermissao(List.of("DOCUMENTO:LER"));
+        usuario.setPermissoes(List.of("DOCUMENTO:LER"));
 
         return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
@@ -61,7 +61,7 @@ public class UsuarioService implements UserDetailsService{
 
     @Transactional
     public UsuarioResponse updateUsuario(UsuarioRequest usuarioRequest){
-        if(!usuarioRequest.email().equals(getUsuarioLogado().getEmail()) && !getUsuarioLogado().getPermissao().contains("*:*")){
+        if(!usuarioRequest.email().equals(getUsuarioLogado().getEmail()) && !getUsuarioLogado().getPermissoes().contains("*:*")){
             throw new InvalidArgumentException("Não é possível atualizar o outro usuário.");
         }
 
@@ -78,7 +78,7 @@ public class UsuarioService implements UserDetailsService{
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
-        usuario.setPermissao(novasPermissoes);
+        usuario.setPermissoes(novasPermissoes);
 
         return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }

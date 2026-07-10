@@ -8,7 +8,7 @@ public record UsuarioResponse(
     UUID id,
     String nome,
     String email,
-    List<String> permissao,
+    List<String> permissoes,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm
 ) {}
