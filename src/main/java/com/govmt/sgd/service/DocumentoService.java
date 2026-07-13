@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DocumentoService {
 
-    private final OrgaoService orgaoService;
     private final UsuarioService usuarioService;
     private final HistoricoService historicoService;
     private final DocumentoRepository documentoRepository;
@@ -29,8 +28,6 @@ public class DocumentoService {
 
     @Transactional
     public DocumentoResponse createDocumento(DocumentoRequest request) {
-        orgaoService.findById(request.orgaoId());
-
         Documento documento = documentoRepository.save(documentoMapper.toDocumentoFromRequest(request));
         DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
 

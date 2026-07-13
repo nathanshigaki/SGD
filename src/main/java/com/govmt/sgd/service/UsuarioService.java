@@ -1,6 +1,8 @@
 package com.govmt.sgd.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +43,7 @@ public class UsuarioService implements UserDetailsService{
         
         Usuario usuario = usuarioMapper.toUsuarioFromRequest(usuarioRequest);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuario.setPermissoes(List.of("DOCUMENTO:LER"));
+        usuario.setPermissoes(new ArrayList<>(Arrays.asList("DOCUMENTO:LER")));
 
         return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
     }
@@ -88,6 +90,7 @@ public class UsuarioService implements UserDetailsService{
         Usuario usuarioExiste = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
         usuarioExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
+        usuarioExiste.getPermissoes().remove("CONTA:ATIVA");
     }
 
     @Override
