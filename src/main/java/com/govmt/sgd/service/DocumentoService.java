@@ -84,7 +84,11 @@ public class DocumentoService {
         );
 
         return estadoDepois;
-    }
+    } 
+    //Qual seria o requisito para aprovar admin? cargo?
+    //Cargo seria apenas um titulo ou seria pre-definições?  
+    //update(caso n for admin -> criar uma solicitação) -> aprovar ou nn a solicitação 
+    //updade (caso seja -> admin) -> atualiza 
 
     @Transactional
     public void deleteDocumento(UUID id) {

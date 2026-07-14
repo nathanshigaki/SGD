@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,9 +96,9 @@ public class UsuarioService implements UserDetailsService{
 
     @Override
     public UserDetails loadUserByUsername(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new NotFoundException("Usuário não encontrado")); //mudar excecao para notauthenticated
-
+        Usuario usuario = usuarioRepository.findByEmail(email) 
+            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        //implementação da interface userdetails, usa o padrão username, mas seria email
         return new UserAuthenticated(usuario);
     }
 

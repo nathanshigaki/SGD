@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,6 +95,19 @@ public class GlobalExceptionHandler {
             request.getRequestURI()
         );
         return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(erro);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
+        ErrorResponse erro = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.UNAUTHORIZED.value(),
+            "Credenciais Inválidas",
+            "E-mail ou palavra-passe incorretos.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(erro);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
