@@ -106,21 +106,42 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }
 
-    @PutMapping("/{id}/permissoes")
+    @PostMapping("/{id}/permissoes")
     @Operation(
-        summary = "Atualizar permissões (Exclusivo Admin)",
-        description = "Substitui a lista de permissões e cargos (Authorities) de um usuário específico."
+        summary = "Adicionar permissões",
+        description = "Adiciona novas permissões para um utilizador específico."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Permissões concedidas/atualizadas com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Corpo da requisição inválido (Lista de permissões mal formatada)"),
+        @ApiResponse(responseCode = "200", description = "Permissões adicionadas com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Corpo da requisição inválido (Lista mal formatada)"),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - Operação exclusiva para administradores"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
     @PreAuthorize("hasAuthority('*:*')")
-    public ResponseEntity<UsuarioResponse> updatePermissoes(@PathVariable UUID id, @Valid @RequestBody List<String> permissoes) {
-        return ResponseEntity.ok(usuarioService.updatePermissoes(id, permissoes));
+    public ResponseEntity<UsuarioResponse> adicionarPermissoes(
+            @PathVariable UUID id, 
+            @Valid @RequestBody List<String> permissoes) {
+        return ResponseEntity.ok(usuarioService.adicionarPermissoes(id, permissoes));
+    }
+
+    @DeleteMapping("/{id}/permissoes")
+    @Operation(
+        summary = "Remover permissões",
+        description = "Remove permissões específicas da conta de um utilizador."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Permissões removidas com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Corpo da requisição inválido"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - Operação exclusiva para administradores"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    @PreAuthorize("hasAuthority('*:*')")
+    public ResponseEntity<UsuarioResponse> removerPermissoes(
+            @PathVariable UUID id, 
+            @Valid @RequestBody List<String> permissoes) {
+        return ResponseEntity.ok(usuarioService.removerPermissoes(id, permissoes));
     }
 
     @DeleteMapping("/{id}")

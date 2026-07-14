@@ -77,13 +77,36 @@ public class UsuarioService implements UserDetailsService{
     }
 
     @Transactional
-    public UsuarioResponse updatePermissoes(UUID id, List<String> novasPermissoes) {
+    public UsuarioResponse adicionarPermissoes(UUID id, List<String> permissoesParaAdicionar) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
-        usuario.setPermissoes(novasPermissoes);
+        List<String> permissoesAtuais = usuario.getPermissoes() != null 
+                ? new ArrayList<>(usuario.getPermissoes()) 
+                : new ArrayList<>();
 
-        return usuarioMapper.toResponseFromUsuario(usuarioRepository.save(usuario));
+        for (String permissao : permissoesParaAdicionar) {
+            if (!permissoesAtuais.contains(permissao)) {
+                permissoesAtuais.add(permissao);
+            }
+        }
+
+        usuario.setPermissoes(permissoesAtuais);
+        return usuarioMapper.toResponseFromUsuario(usuario);
+    }
+
+    @Transactional
+    public UsuarioResponse removerPermissoes(UUID id, List<String> permissoesParaRemover) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+
+        if (usuario.getPermissoes() != null) {
+            List<String> permissoesAtuais = new java.util.ArrayList<>(usuario.getPermissoes());
+            permissoesAtuais.removeAll(permissoesParaRemover);
+            usuario.setPermissoes(permissoesAtuais);
+        }
+
+        return usuarioMapper.toResponseFromUsuario(usuario);
     }
 
     @Transactional
