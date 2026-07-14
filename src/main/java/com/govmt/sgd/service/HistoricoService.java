@@ -26,18 +26,33 @@ public class HistoricoService {
     private final HistoricoMapper historicoMapper;
 
     @Transactional
-    public void saveHistorico(Documento documento, Usuario usuario, String acao, Object antes, Object depois) {
+    public void saveHistorico(Documento documento, Usuario usuario, Usuario aprovador, String situacao, String acao, Object antes, Object depois) {
         Historico historico = new Historico();
         historico.setDocumento(documento);
         historico.setUsuario(usuario);
         historico.setAprovador(null);
         //adicionar no documentoService o metodo para pegar o id do jwt q vai ser o aprovador, 
         //adicionar a condição do aprovador para aprovar as mudanças e assim mudar as coisas, enquanto n tiver deixar pre salvo para o aprovador aprovar.
-
+        historico.setSituacao(situacao);
         historico.setAcao(acao);
         historico.setValores(new ValoresHistorico(antes, depois));
         
         historicoRepository.save(historico);
+    }
+
+    @Transactional
+    public HistoricoResponse solicitarAprovacao(Documento documento, Usuario usuario, String acao, Object antes, Object depois){
+        Historico historico = new Historico();
+        historico.setDocumento(documento);
+        historico.setUsuario(usuario);
+        historico.setAprovador(null);
+        historico.setSituacao("PENDENTE_APROVACAO"); 
+        historico.setAcao(acao);
+        historico.setValores(new ValoresHistorico(antes, depois));
+        //gambiarra salvando no historico, na paginação do historico iria ignorar "PENDENTE_APROVACAO"
+        //criaria outra paginação para mostrar as solitações pendentes 
+        //mlr solução seria fazer um cache?
+        return historicoMapper.toResponseFromHistorico(historicoRepository.save(historico));
     }
 
     @Transactional(readOnly = true)

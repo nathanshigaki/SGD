@@ -10,10 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.DocumentoRequest;
 import com.govmt.sgd.dto.response.DocumentoResponse;
+import com.govmt.sgd.exception.InvalidArgumentException;
 import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.DocumentoMapper;
 import com.govmt.sgd.model.Documento;
+import com.govmt.sgd.model.Historico;
+import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.DocumentoRepository;
+import com.govmt.sgd.repository.HistoricoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,22 +27,29 @@ public class DocumentoService {
 
     private final UsuarioService usuarioService;
     private final HistoricoService historicoService;
+    private final HistoricoRepository historicoRepository;
     private final DocumentoRepository documentoRepository;
     private final DocumentoMapper documentoMapper;
 
+    //cud(create, update, delete) solicitarAprovação -> ValidaSolicitação -> cud
     @Transactional
     public DocumentoResponse createDocumento(DocumentoRequest request) {
-        Documento documento = documentoRepository.save(documentoMapper.toDocumentoFromRequest(request));
-        DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
+        Usuario usuario = usuarioService.getUsuarioLogado();
+        if (usuario.getPermissoes().contains("*:*")) {
+            Documento salvar = documentoRepository.save(documentoMapper.toDocumentoFromRequest(request));
+            return documentoMapper.toResponseFromDocumento(salvar);
+        }
 
-        historicoService.saveHistorico(
-            documento, 
-            usuarioService.getUsuarioLogado(), 
+        Documento documentoProposto = documentoMapper.toDocumentoFromRequest(request);
+
+        historicoService.solicitarAprovacao(
+            documentoProposto, 
+            usuario, 
             "CRIAR_DOCUMENTO", 
             null,           
-            estadoDepois  
+            request  
         );
-        return estadoDepois;
+        return documentoMapper.toResponseFromDocumento(documentoProposto);
     }
 
     @Transactional(readOnly = true)
@@ -75,6 +86,7 @@ public class DocumentoService {
         documentoMapper.updateDocumentoFromRequest(request, documento);
         DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
 
+        if (usuarioService.getUsuarioLogado().getPermissoes().contains("*:*"))
         historicoService.saveHistorico(
             documento, 
             usuarioService.getUsuarioLogado(), 
@@ -86,7 +98,8 @@ public class DocumentoService {
         return estadoDepois;
     } 
     //Qual seria o requisito para aprovar admin? cargo?
-    //Cargo seria apenas um titulo ou seria pre-definições?  
+    //Quais lugares seriam necessarios a aprovação da ação? 
+    //Cargo seria apenas um titulo ou seria pre-definições do usuario?  
     //update(caso n for admin -> criar uma solicitação) -> aprovar ou nn a solicitação 
     //updade (caso seja -> admin) -> atualiza 
 
@@ -105,5 +118,50 @@ public class DocumentoService {
             estadoAntes, 
             estadoDepois 
         );
+    }
+
+    @Transactional
+    public Documento executarCriacao(DocumentoRequest request) {
+        Documento documento = documentoMapper.toDocumentoFromRequest(request);
+        return documentoRepository.save(documento);
+    }
+
+    @Transactional
+    public void validarSolicitacao(UUID historicoId, boolean aprovado) {
+        Historico historico = historicoRepository.findById(historicoId)
+                .orElseThrow(() -> new NotFoundException("Solicitação de auditoria não encontrada"));
+
+        if (!"PENDENTE_APROVACAO".equals(historico.getSituacao())) {
+            throw new InvalidArgumentException("Esta solicitação já foi processada anteriormente.");
+        }
+
+        Usuario aprovador = usuarioService.getUsuarioLogado();
+        historico.setAprovador(aprovador);
+
+        if (!aprovado) {
+            historico.setSituacao("REJEITADO");
+            historicoRepository.save(historico);
+            return;
+        }
+
+        historico.setSituacao("APROVADO");
+
+        switch (historico.getAcao()) {
+            case "CRIAR_DOCUMENTO" -> {
+                DocumentoRequest request = documentoMapper.toRequestFromDocumento(historico.getDocumento());
+                Documento novoDocumento = executarCriacao(request);
+                historicoService.saveHistorico(novoDocumento, historico.getUsuario(), aprovador, "INICIADO", "CRIAR_DOCUMENTO", null, novoDocumento);
+            }
+            case "ATUALIZAR_DOCUMENTO" -> {
+                DocumentoRequest request = objectMapper.convertValue(historico.getValores().depois(), DocumentoRequest.class);
+                documentoService.persistirAtualizacao(request);
+            }
+            case "DELETAR_DOCUMENTO" -> {
+                documentoService.persistirDelecao(historico.getDocumento().getId());
+            }
+            default -> throw new InvalidArgumentException("Ação de histórico desconhecida: " + historico.getAcao());
+        }
+
+        historicoRepository.save(historico);
     }
 }
