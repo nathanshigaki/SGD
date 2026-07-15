@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.govmt.sgd.dto.request.DocumentoRequest;
 import com.govmt.sgd.dto.response.DocumentoResponse;
 import com.govmt.sgd.exception.InvalidArgumentException;
@@ -30,6 +32,7 @@ public class DocumentoService {
     private final HistoricoRepository historicoRepository;
     private final DocumentoRepository documentoRepository;
     private final DocumentoMapper documentoMapper;
+    private final ObjectMapper objectMapper;
 
     //cud(create, update, delete) solicitarAprovação -> ValidaSolicitação -> cud
     @Transactional
@@ -82,20 +85,27 @@ public class DocumentoService {
         Documento documento = documentoRepository.findById(request.id())
             .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
 
-        DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
-        documentoMapper.updateDocumentoFromRequest(request, documento);
-        DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
+        Usuario usuario = usuarioService.getUsuarioLogado();
 
-        if (usuarioService.getUsuarioLogado().getPermissoes().contains("*:*"))
-        historicoService.saveHistorico(
+        if (usuario.getPermissoes().contains("*:*")) {
+            DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
+            documentoMapper.updateDocumentoFromRequest(request, documento);
+            Documento documentoSalvo = documentoRepository.save(documento);
+            DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documentoSalvo);
+            historicoService.saveHistorico(documentoSalvo, usuario, usuario, "APROVADO", "ATUALIZAR_DOCUMENTO", estadoAntes, estadoDepois);
+            return estadoDepois;
+        }
+
+        DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
+        historicoService.solicitarAprovacao(
             documento, 
-            usuarioService.getUsuarioLogado(), 
+            usuario, 
             "ATUALIZAR_DOCUMENTO", 
             estadoAntes, 
-            estadoDepois
+            request
         );
-
-        return estadoDepois;
+        
+        return estadoAntes;
     } 
     //Qual seria o requisito para aprovar admin? cargo?
     //Quais lugares seriam necessarios a aprovação da ação? 
@@ -108,15 +118,25 @@ public class DocumentoService {
         Documento documento = documentoRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
 
+        Usuario usuario = usuarioService.getUsuarioLogado();
+
+        if (usuario.getPermissoes().contains("*:*")) {
+            DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
+            documento.setDeletadoEm(LocalDateTime.now()); // softdelete
+            Documento documentoSalvo = documentoRepository.save(documento);
+            DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documentoSalvo);
+
+            historicoService.saveHistorico(documentoSalvo, usuario, usuario, "APROVADO", "DELETAR_DOCUMENTO", estadoAntes, estadoDepois);
+            return;
+        }
+
         DocumentoResponse estadoAntes = documentoMapper.toResponseFromDocumento(documento);
-        documento.setDeletadoEm(LocalDateTime.now()); //softdelete
-        DocumentoResponse estadoDepois = documentoMapper.toResponseFromDocumento(documento);
-        historicoService.saveHistorico(
+        historicoService.solicitarAprovacao(
             documento, 
-            usuarioService.getUsuarioLogado(), 
-            "ATUALIZAR_DOCUMENTO", 
+            usuario, 
+            "DELETAR_DOCUMENTO", 
             estadoAntes, 
-            estadoDepois 
+            null
         );
     }
 
@@ -127,41 +147,74 @@ public class DocumentoService {
     }
 
     @Transactional
+    public Documento executarAtualizacao(DocumentoRequest request) {
+        Documento documentoExistente = documentoRepository.findById(request.id())
+                .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
+                
+        documentoMapper.updateDocumentoFromRequest(request, documentoExistente);
+        return documentoRepository.save(documentoExistente);
+    }
+
+    @Transactional
+    public Documento executarDelecao(UUID documentoId) {
+        Documento documentoExistente = documentoRepository.findById(documentoId)
+                .orElseThrow(() -> new NotFoundException("Documento não encontrado"));
+                
+        documentoExistente.setDeletadoEm(LocalDateTime.now());
+        return documentoRepository.save(documentoExistente);
+    }
+
+    @Transactional
     public void validarSolicitacao(UUID historicoId, boolean aprovado) {
-        Historico historico = historicoRepository.findById(historicoId)
+        Historico solicitacaoPendente = historicoRepository.findById(historicoId)
                 .orElseThrow(() -> new NotFoundException("Solicitação de auditoria não encontrada"));
 
-        if (!"PENDENTE_APROVACAO".equals(historico.getSituacao())) {
+        if (!"PENDENTE_APROVACAO".equals(solicitacaoPendente.getSituacao())) {
             throw new InvalidArgumentException("Esta solicitação já foi processada anteriormente.");
         }
 
         Usuario aprovador = usuarioService.getUsuarioLogado();
-        historico.setAprovador(aprovador);
-
         if (!aprovado) {
-            historico.setSituacao("REJEITADO");
-            historicoRepository.save(historico);
+            historicoService.saveHistorico(
+                solicitacaoPendente.getDocumento(), 
+                solicitacaoPendente.getUsuario(),
+                aprovador, 
+                "REJEITADO", 
+                solicitacaoPendente.getAcao(), 
+                solicitacaoPendente.getValores().antes(), 
+                solicitacaoPendente.getValores().depois()
+            );
             return;
         }
 
-        historico.setSituacao("APROVADO");
+        Documento documentoFinal = null;
 
-        switch (historico.getAcao()) {
+        switch (solicitacaoPendente.getAcao()) {
             case "CRIAR_DOCUMENTO" -> {
-                DocumentoRequest request = documentoMapper.toRequestFromDocumento(historico.getDocumento());
-                Documento novoDocumento = executarCriacao(request);
-                historicoService.saveHistorico(novoDocumento, historico.getUsuario(), aprovador, "INICIADO", "CRIAR_DOCUMENTO", null, novoDocumento);
+                DocumentoRequest request = objectMapper.convertValue(solicitacaoPendente.getValores().depois(), DocumentoRequest.class);
+                documentoFinal = executarCriacao(request);
             }
+            
             case "ATUALIZAR_DOCUMENTO" -> {
-                DocumentoRequest request = objectMapper.convertValue(historico.getValores().depois(), DocumentoRequest.class);
-                documentoService.persistirAtualizacao(request);
+                DocumentoRequest request = objectMapper.convertValue(solicitacaoPendente.getValores().depois(), DocumentoRequest.class);
+                documentoFinal = executarAtualizacao(request);
             }
+            
             case "DELETAR_DOCUMENTO" -> {
-                documentoService.persistirDelecao(historico.getDocumento().getId());
+                documentoFinal = executarDelecao(solicitacaoPendente.getDocumento().getId());
             }
-            default -> throw new InvalidArgumentException("Ação de histórico desconhecida: " + historico.getAcao());
+            
+            default -> throw new InvalidArgumentException("Ação de histórico desconhecida.");
         }
 
-        historicoRepository.save(historico);
+        historicoService.saveHistorico(
+            documentoFinal, 
+            solicitacaoPendente.getUsuario(), 
+            aprovador, 
+            "APROVADO", 
+            solicitacaoPendente.getAcao(), 
+            solicitacaoPendente.getValores().antes(), 
+            solicitacaoPendente.getValores().depois()
+        );
     }
 }

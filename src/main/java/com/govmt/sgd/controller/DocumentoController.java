@@ -43,10 +43,11 @@ public class DocumentoController {
     @PostMapping
     @Operation(
         summary = "Criar novo documento",
-        description = "Registra um novo documento no sistema. Rota protegida"
+        description = "Cria um documento diretamente (se Admin) ou gera uma solicitação de criação pendente de aprovação."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Documento criado com sucesso"),
+        @ApiResponse(responseCode = "202", description = "Solicitação de criação e enviada para aprovação"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos na requisição (erro de validação)"),
         @ApiResponse(responseCode = "401", description = "Token de autenticação ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
@@ -54,6 +55,9 @@ public class DocumentoController {
     @PreAuthorize("hasAuthority('DOCUMENTO:CRIAR')")
     public ResponseEntity<DocumentoResponse> create(@Valid @RequestBody DocumentoRequest request) {
         DocumentoResponse response = documentoService.createDocumento(request);
+        if (response.id() == null) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -121,6 +125,7 @@ public class DocumentoController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Documento atualizado com sucesso"),
+        @ApiResponse(responseCode = "202", description = "Solicitação de atualização e enviada para aprovação"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos na requisição"),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização"),
@@ -128,7 +133,8 @@ public class DocumentoController {
     })
     @PreAuthorize("hasAuthority('DOCUMENTO:ATUALIZAR')")
     public ResponseEntity<DocumentoResponse> update(@Valid @RequestBody DocumentoRequest request) {
-        return ResponseEntity.ok(documentoService.updateDocumento(request));
+        DocumentoResponse response = documentoService.updateDocumento(request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @DeleteMapping("/{id}")
@@ -137,7 +143,7 @@ public class DocumentoController {
         description = "Remove fisicamente um documento do sistema."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Documento excluído com sucesso (No Content)"),
+        @ApiResponse(responseCode = "202", description = "Pedido de exclusão aceite (Ação enviada para aprovação ou executada com sucesso)"),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização"),
         @ApiResponse(responseCode = "404", description = "Documento não encontrado")
@@ -145,6 +151,26 @@ public class DocumentoController {
     @PreAuthorize("hasAuthority('DOCUMENTO:EXCLUIR')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         documentoService.deleteDocumento(id);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @PutMapping("/solicitacoes/{historicoId}/validar")
+    @Operation(
+        summary = "Validar Solicitação de Alteração (Maker-Checker)", 
+        description = "Aprova ou rejeita um pedido de pendente. Se aprovado, as alterações são consolidadas na base de dados. (Exclusivo Admin)"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Solicitação avaliada com sucesso (Aprovada ou Rejeitada)"),
+        @ApiResponse(responseCode = "400", description = "A solicitação já foi processada anteriormente"),
+        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - Operação exclusiva para administradores (*:*)"),
+        @ApiResponse(responseCode = "404", description = "Registo de solicitação (Histórico) não encontrado")
+    })
+    @PreAuthorize("hasAuthority('*:*')")
+    public ResponseEntity<Void> validarSolicitacao(
+            @PathVariable UUID historicoId, 
+            @RequestParam boolean aprovado) {
+        documentoService.validarSolicitacao(historicoId, aprovado);
         return ResponseEntity.noContent().build();
     }
 }
