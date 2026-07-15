@@ -21,7 +21,7 @@ public interface HistoricoRepository extends JpaRepository<Historico, UUID> {
             LEFT JOIN FETCH h.aprovador 
             WHERE h.situacao != 'PENDENTE_APROVACAO'
     """, //N APARECE OS PENDENTES NO HISTORICO COMUM
-    		countQuery = "SELECT count(h) FROM Historico h WHERE h.situacao != 'PENDENTE_APROVACAO")
+    		countQuery = "SELECT count(h) FROM Historico h WHERE h.situacao != 'PENDENTE_APROVACAO'")
   Page<Historico> getAll(Pageable pageable);
 
     @Query(
