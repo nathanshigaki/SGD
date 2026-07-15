@@ -114,7 +114,12 @@ public class UsuarioService implements UserDetailsService{
         Usuario usuarioExiste = usuarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
         usuarioExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
-        usuarioExiste.getPermissoes().remove("CONTA:ATIVA");
+        
+        if (usuarioExiste.getPermissoes() != null) {
+            List<String> permissoesSeguras = new ArrayList<>(usuarioExiste.getPermissoes());
+            permissoesSeguras.remove("CONTA:ATIVA");
+            usuarioExiste.setPermissoes(permissoesSeguras);
+        }
     }
 
     @Override

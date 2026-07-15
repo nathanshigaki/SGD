@@ -13,9 +13,16 @@ import com.govmt.sgd.model.Historico;
 
 public interface HistoricoRepository extends JpaRepository<Historico, UUID> {
 
-	@Query(value = "SELECT h FROM Historico h LEFT JOIN FETCH h.documento LEFT JOIN FETCH h.usuario LEFT JOIN FETCH h.aprovador",
-    		countQuery = "SELECT count(h) FROM Historico h")
-    Page<Historico> getAll(Pageable pageable);
+	@Query(
+    value = """
+            SELECT h FROM Historico h 
+            LEFT JOIN FETCH h.documento 
+            LEFT JOIN FETCH h.usuario 
+            LEFT JOIN FETCH h.aprovador 
+            WHERE h.situacao != 'PENDENTE_APROVACAO'
+    """, //N APARECE OS PENDENTES NO HISTORICO COMUM
+    		countQuery = "SELECT count(h) FROM Historico h WHERE h.situacao != 'PENDENTE_APROVACAO")
+  Page<Historico> getAll(Pageable pageable);
 
     @Query(
 		value = """
