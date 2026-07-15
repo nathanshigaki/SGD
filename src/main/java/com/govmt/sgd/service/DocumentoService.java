@@ -187,6 +187,7 @@ public class DocumentoService {
             return;
         }
 
+        solicitacaoPendente.setSituacao("APROVADO");
         Documento documentoFinal = null;
 
         switch (solicitacaoPendente.getAcao()) {
