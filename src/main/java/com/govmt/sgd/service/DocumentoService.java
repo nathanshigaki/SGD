@@ -174,6 +174,8 @@ public class DocumentoService {
         }
 
         Usuario aprovador = usuarioService.getUsuarioLogado();
+        solicitacaoPendente.setAprovador(aprovador);
+        
         if (!aprovado) {
             historicoService.saveHistorico(
                 solicitacaoPendente.getDocumento(), 
@@ -194,6 +196,7 @@ public class DocumentoService {
             case "CRIAR_DOCUMENTO" -> {
                 DocumentoRequest request = objectMapper.convertValue(solicitacaoPendente.getValores().depois(), DocumentoRequest.class);
                 documentoFinal = executarCriacao(request);
+                solicitacaoPendente.setDocumento(documentoFinal);
             }
             
             case "ATUALIZAR_DOCUMENTO" -> {
