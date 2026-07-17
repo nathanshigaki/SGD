@@ -43,7 +43,11 @@ public class HistoricoService {
     @Transactional
     public HistoricoResponse solicitarAprovacao(Documento documento, Usuario usuario, String acao, Object antes, Object depois){
         Historico historico = new Historico();
-        historico.setDocumento(documento);
+        if (documento != null && documento.getId() != null) {
+            historico.setDocumento(documento);
+        } else {
+            historico.setDocumento(null);
+        }
         historico.setUsuario(usuario);
         historico.setAprovador(null);
         historico.setSituacao("PENDENTE_APROVACAO"); 

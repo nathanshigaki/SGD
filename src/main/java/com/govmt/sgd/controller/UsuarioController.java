@@ -101,7 +101,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "403", description = "Acesso negado"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     })
-    @PreAuthorize("hasAuthority('USUARIO:ATUALIZAR')")
+    @PreAuthorize("hasAuthority('*:*')")
     public ResponseEntity<UsuarioResponse> update(@Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.updateUsuario(request));
     }

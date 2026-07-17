@@ -13,6 +13,8 @@ import com.govmt.sgd.model.Documento;
 
 public interface DocumentoRepository extends JpaRepository<Documento, UUID> {
 
+    boolean existsByOrgaoId(UUID orgaoId);
+
     @Query("SELECT d FROM Documento d LEFT JOIN FETCH d.orgao LEFT JOIN FETCH d.usuarios du LEFT JOIN FETCH du.usuario")
     Page<Documento> findAllWithResponsaveis(Pageable pageable);
 

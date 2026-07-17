@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.OrgaoRequest;
 import com.govmt.sgd.dto.response.OrgaoResponse;
+import com.govmt.sgd.exception.InvalidArgumentException;
 import com.govmt.sgd.exception.NotFoundException;
+import com.govmt.sgd.repository.DocumentoRepository;
 import com.govmt.sgd.repository.OrgaoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class OrgaoService {
 
     private final OrgaoMapper orgaoMapper;
     private final OrgaoRepository orgaoRepository;
+    private final DocumentoRepository documentoRepository;
 
     @Transactional
     public OrgaoResponse createOrgao(OrgaoRequest orgaoRequest){
@@ -57,6 +60,11 @@ public class OrgaoService {
     public void deleteOrgao(UUID id){
         Orgao orgaoExiste = orgaoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
+        
+        if (documentoRepository.existsByOrgaoId(id)) {
+            throw new InvalidArgumentException("Não é possível excluir este órgão pois existem documentos vinculados a ele.");
+        }
+
         orgaoExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
     }
 }
