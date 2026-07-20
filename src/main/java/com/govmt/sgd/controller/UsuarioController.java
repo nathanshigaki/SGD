@@ -39,22 +39,6 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    @PostMapping
-    @Operation(
-        summary = "Cadastrar novo usuário",
-        description = "Registra uma nova conta de usuário no sistema."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Usuário cadastrado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados de requisição inválidos ou e-mail já existente"),
-        @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
-        @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
-    })
-    @PreAuthorize("hasAuthority('USUARIO:CRIAR')")
-    public ResponseEntity<UsuarioResponse> createUsuario(@Valid @RequestBody UsuarioRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.createUsuario(request));
-    }
-
     @GetMapping
     @Operation(
         summary = "Listar todos os usuários",

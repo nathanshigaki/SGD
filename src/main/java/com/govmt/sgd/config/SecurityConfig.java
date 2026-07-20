@@ -47,8 +47,7 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/login").permitAll() // Rota de login pública
-                .requestMatchers(HttpMethod.POST, "/usuarios").permitAll() // Rota para criar usuário pública
+                .requestMatchers("/login", "/cadastrar").permitAll() // Rota de login e cadastro pública
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Rota do swagger
                 .anyRequest().authenticated() // Todas as outras exigem token
             )

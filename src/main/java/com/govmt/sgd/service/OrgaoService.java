@@ -60,10 +60,6 @@ public class OrgaoService {
     public void deleteOrgao(UUID id){
         Orgao orgaoExiste = orgaoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Órgão não encontrado"));
-        
-        if (documentoRepository.existsByOrgaoId(id)) {
-            throw new InvalidArgumentException("Não é possível excluir este órgão pois existem documentos vinculados a ele.");
-        }
 
         orgaoExiste.setDeletadoEm(LocalDateTime.now()); //softdelete
     }
