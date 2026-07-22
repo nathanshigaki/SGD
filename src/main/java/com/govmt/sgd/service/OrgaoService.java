@@ -13,9 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.govmt.sgd.dto.request.OrgaoRequest;
 import com.govmt.sgd.dto.response.OrgaoResponse;
-import com.govmt.sgd.exception.InvalidArgumentException;
 import com.govmt.sgd.exception.NotFoundException;
-import com.govmt.sgd.repository.DocumentoRepository;
 import com.govmt.sgd.repository.OrgaoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,7 +24,6 @@ public class OrgaoService {
 
     private final OrgaoMapper orgaoMapper;
     private final OrgaoRepository orgaoRepository;
-    private final DocumentoRepository documentoRepository;
 
     @Transactional
     public OrgaoResponse createOrgao(OrgaoRequest orgaoRequest){
