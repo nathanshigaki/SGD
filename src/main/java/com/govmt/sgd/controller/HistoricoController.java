@@ -42,7 +42,7 @@ public class HistoricoController {
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
-    @PreAuthorize("hasAuthority('HISTORICO:LER')") 
+    @PreAuthorize("hasAuthority('HISTORICO:LER') or hasAuthority('*:*')") 
     public ResponseEntity<Page<HistoricoResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
@@ -60,7 +60,7 @@ public class HistoricoController {
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
-    @PreAuthorize("hasAuthority('HISTORICO:LER')") 
+    @PreAuthorize("hasAuthority('HISTORICO:LER') or hasAuthority('*:*')") 
     public ResponseEntity<Page<HistoricoResponse>> pesquisarHistorico(
         @RequestParam(required = false) UUID documentoId,
         @RequestParam(required = false) UUID usuarioId,

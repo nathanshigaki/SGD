@@ -64,7 +64,7 @@ public class UsuarioService implements UserDetailsService{
 
     @Transactional
     public UsuarioResponse updateUsuario(UsuarioRequest usuarioRequest){
-        if(!usuarioRequest.email().equals(getUsuarioLogado().getEmail()) && !getUsuarioLogado().getPermissoes().contains("*:*")){
+        if(!usuarioRequest.id().equals(getUsuarioLogado().getId()) && !getUsuarioLogado().getPermissoes().contains("*:*")){
             throw new InvalidArgumentException("Não é possível atualizar o outro usuário.");
         }
 

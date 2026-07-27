@@ -6,5 +6,8 @@ CREATE TABLE historico (
   situacao VARCHAR(255),
   acao VARCHAR(255),
   valores JSONB,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (documento_id) REFERENCES documentos(id),
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+  FOREIGN KEY (aprovador_id) REFERENCES usuarios(id)
 );

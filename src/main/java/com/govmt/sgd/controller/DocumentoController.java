@@ -52,7 +52,7 @@ public class DocumentoController {
         @ApiResponse(responseCode = "401", description = "Token de autenticação ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
-    @PreAuthorize("hasAuthority('DOCUMENTO:CRIAR')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:CRIAR') or hasAuthority('*:*')")
     public ResponseEntity<DocumentoResponse> create(@Valid @RequestBody DocumentoRequest request) {
         DocumentoResponse response = documentoService.createDocumento(request);
         if (response.id() == null) {
@@ -71,7 +71,7 @@ public class DocumentoController {
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
-    @PreAuthorize("hasAuthority('DOCUMENTO:LER')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:LER') or hasAuthority('*:*')")
     public ResponseEntity<Page<DocumentoResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
@@ -89,7 +89,7 @@ public class DocumentoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização"),
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido")
     })
-    @PreAuthorize("hasAuthority('DOCUMENTO:LER')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:LER') or hasAuthority('*:*')")
     public ResponseEntity<Page<DocumentoResponse>> buscarComFiltros(
             @RequestParam(required = false) String sigdoc,
             @RequestParam(required = false) String situacao,
@@ -113,7 +113,7 @@ public class DocumentoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado"),
         @ApiResponse(responseCode = "404", description = "Documento não encontrado na base de dados")
     })
-    @PreAuthorize("hasAuthority('DOCUMENTO:LER')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:LER') or hasAuthority('*:*')")
     public ResponseEntity<DocumentoResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(documentoService.findById(id));
     }
@@ -131,7 +131,7 @@ public class DocumentoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização"),
         @ApiResponse(responseCode = "404", description = "Documento não encontrado para atualização")
     })
-    @PreAuthorize("hasAuthority('DOCUMENTO:ATUALIZAR')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:ATUALIZAR') or hasAuthority('*:*')")
     public ResponseEntity<DocumentoResponse> update(@Valid @RequestBody DocumentoRequest request) {
         DocumentoResponse response = documentoService.updateDocumento(request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
@@ -148,7 +148,7 @@ public class DocumentoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização"),
         @ApiResponse(responseCode = "404", description = "Documento não encontrado")
     })
-    @PreAuthorize("hasAuthority('DOCUMENTO:EXCLUIR')")
+    @PreAuthorize("hasAuthority('DOCUMENTO:EXCLUIR') or hasAuthority('*:*')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         documentoService.deleteDocumento(id);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
