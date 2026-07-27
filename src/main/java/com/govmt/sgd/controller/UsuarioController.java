@@ -48,7 +48,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
-    @PreAuthorize("hasAuthority('USUARIO:LER')")
+    @PreAuthorize("hasAuthority('USUARIO:LER') or hasAuthority('*:*')")
     public ResponseEntity<Page<UsuarioResponse>> getAllUsuarios(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "nome", direction = Sort.Direction.DESC) Pageable pageable
@@ -67,7 +67,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "403", description = "Acesso negado"),
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado na base de dados")
     })
-    @PreAuthorize("hasAuthority('USUARIO:LER')")
+    @PreAuthorize("hasAuthority('USUARIO:LER') or hasAuthority('*:*')")
     public ResponseEntity<UsuarioResponse> findUsuarioById(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }
@@ -139,7 +139,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
         @ApiResponse(responseCode = "500", description = "Erro de integridade (Ex: Usuário está atrelado ao histórico ou a documentos)")
     })
-    @PreAuthorize("hasAuthority('USUARIO:EXCLUIR')")
+    @PreAuthorize("hasAuthority('USUARIO:EXCLUIR') or hasAuthority('*:*')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         usuarioService.deleteUsuario(id);
         return ResponseEntity.noContent().build();
