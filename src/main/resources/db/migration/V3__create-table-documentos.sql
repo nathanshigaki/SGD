@@ -1,5 +1,5 @@
 CREATE TABLE documentos (
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
   orgao_id UUID,
   sigdoc VARCHAR(255),
   chegou_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

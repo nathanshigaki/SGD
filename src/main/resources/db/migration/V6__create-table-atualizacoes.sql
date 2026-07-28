@@ -1,5 +1,5 @@
 CREATE TABLE atualizacoes (
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
   documento_id UUID,
   usuario_id UUID,
   atualizacao VARCHAR(255),
