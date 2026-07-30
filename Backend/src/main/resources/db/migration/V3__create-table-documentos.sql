@@ -13,7 +13,7 @@ CREATE TABLE documentos (
   resumo TEXT,
   tipo_contratacao VARCHAR(255),
   objeto TEXT,
-  recomendacao VARCHAR(255),
+  recomendacao TEXT,
   parecer_final VARCHAR(255),
   deletado_em TIMESTAMP DEFAULT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

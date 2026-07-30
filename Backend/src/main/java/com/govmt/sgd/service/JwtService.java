@@ -20,7 +20,7 @@ public class JwtService {
 
     public String generateToken(Authentication authentication) {
         Instant now = Instant.now();
-        Instant exp = now.plusSeconds(3600); // Expira em 1 hora
+        Instant exp = now.plusSeconds(3600 * 24); // Expira em 1 dia
 
         String scopes = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)

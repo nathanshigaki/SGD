@@ -6,11 +6,11 @@ VALUES
 ),
 (
     'Casa Civil',
-    'CASA CIVIL'
+    'CASACIVIL'
 ),
 (
     'Casa Militar',
-    'CASA MILITAR'
+    'CASAMILITAR'
 ),
 (
     'Corpo de Bombeiros Militar',
@@ -22,7 +22,7 @@ VALUES
 ),
 (
     'Agência de Fomento do Estado de Mato Grosso',
-    'DESENVOLVE MT'
+    'DESENVOLVEMT'
 ),
 (
     'Departamento Estadual de Trânsito',
@@ -74,11 +74,11 @@ VALUES
 ),
 (
     'Mato Grosso Previdência',
-    'MTPREV',
+    'MTPREV'
 ),
 (
     'Plano de Saúde do Estado',
-    'MT SAÚDE'
+    'MTSAUDE'
 ),
 (
     'Procuradoria-Geral do Estado',
@@ -106,7 +106,7 @@ VALUES
 ),
 (
     'Secretaria de Estado de Ciência, Tecnologia e Inovação',
-    'SECITEC'
+    'SECITECI'
 ),
 (
     'Secretaria de Estado de Comunicação',

@@ -6,6 +6,9 @@ target/
 /src/main/resources/app.key
 /src/main/resources/app.pub
 /src/main/resources/meta-inf/
+script/documentos.xlsx
+script/.env
+/src/main/resources/db/migration/V10__popular_usuarios.sql
 
 ### STS ###
 .apt_generated
