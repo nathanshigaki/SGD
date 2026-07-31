@@ -1,0 +1,5 @@
+export { DocumentosListPage } from '@/features/documentos/pages/DocumentosListPage'
+export { DocumentoNovoPage } from '@/features/documentos/pages/DocumentoNovoPage'
+export { DocumentoDetailPage } from '@/features/documentos/pages/DocumentoDetailPage'
+export { SolicitacoesPendentesPage } from '@/features/documentos/pages/SolicitacoesPendentesPage'
+export type { Documento, DocumentoRequest, DocumentoFiltros } from '@/features/documentos/types'

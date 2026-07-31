@@ -1,0 +1,7 @@
+export { HistoricoListPage } from '@/features/historico/pages/HistoricoListPage'
+export { HistoricoTable } from '@/features/historico/components/HistoricoTable'
+export { HistoricoDiff } from '@/features/historico/components/HistoricoDiff'
+export { SolicitacoesPendentesTable } from '@/features/historico/components/SolicitacoesPendentesTable'
+export { useHistoricoQuery } from '@/features/historico/api/queries'
+export { HISTORICO_SITUACAO } from '@/features/historico/types'
+export type { Historico, HistoricoFiltros } from '@/features/historico/types'

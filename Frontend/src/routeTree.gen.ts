@@ -10,33 +10,131 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthDashboardRouteImport } from './routes/_auth/dashboard'
+import { Route as AuthDocumentosIndexRouteImport } from './routes/_auth/documentos/index'
+import { Route as AuthDocumentosIdRouteImport } from './routes/_auth/documentos/$id'
+import { Route as AuthDocumentosNovoRouteImport } from './routes/_auth/documentos/novo'
+import { Route as AuthDocumentosSolicitacoesRouteImport } from './routes/_auth/documentos/solicitacoes'
+import { Route as AuthHistoricoIndexRouteImport } from './routes/_auth/historico/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthDashboardRoute = AuthDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDocumentosIndexRoute = AuthDocumentosIndexRouteImport.update({
+  id: '/documentos/',
+  path: '/documentos/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDocumentosIdRoute = AuthDocumentosIdRouteImport.update({
+  id: '/documentos/$id',
+  path: '/documentos/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDocumentosNovoRoute = AuthDocumentosNovoRouteImport.update({
+  id: '/documentos/novo',
+  path: '/documentos/novo',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDocumentosSolicitacoesRoute =
+  AuthDocumentosSolicitacoesRouteImport.update({
+    id: '/documentos/solicitacoes',
+    path: '/documentos/solicitacoes',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthHistoricoIndexRoute = AuthHistoricoIndexRouteImport.update({
+  id: '/historico/',
+  path: '/historico/',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/documentos/$id': typeof AuthDocumentosIdRoute
+  '/documentos/novo': typeof AuthDocumentosNovoRoute
+  '/documentos/solicitacoes': typeof AuthDocumentosSolicitacoesRoute
+  '/documentos/': typeof AuthDocumentosIndexRoute
+  '/historico/': typeof AuthHistoricoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/documentos/$id': typeof AuthDocumentosIdRoute
+  '/documentos/novo': typeof AuthDocumentosNovoRoute
+  '/documentos/solicitacoes': typeof AuthDocumentosSolicitacoesRoute
+  '/documentos': typeof AuthDocumentosIndexRoute
+  '/historico': typeof AuthHistoricoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_auth/dashboard': typeof AuthDashboardRoute
+  '/_auth/documentos/$id': typeof AuthDocumentosIdRoute
+  '/_auth/documentos/novo': typeof AuthDocumentosNovoRoute
+  '/_auth/documentos/solicitacoes': typeof AuthDocumentosSolicitacoesRoute
+  '/_auth/documentos/': typeof AuthDocumentosIndexRoute
+  '/_auth/historico/': typeof AuthHistoricoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/documentos/$id'
+    | '/documentos/novo'
+    | '/documentos/solicitacoes'
+    | '/documentos/'
+    | '/historico/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/documentos/$id'
+    | '/documentos/novo'
+    | '/documentos/solicitacoes'
+    | '/documentos'
+    | '/historico'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/login'
+    | '/_auth/dashboard'
+    | '/_auth/documentos/$id'
+    | '/_auth/documentos/novo'
+    | '/_auth/documentos/solicitacoes'
+    | '/_auth/documentos/'
+    | '/_auth/historico/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +146,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/dashboard': {
+      id: '/_auth/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthDashboardRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/documentos/': {
+      id: '/_auth/documentos/'
+      path: '/documentos'
+      fullPath: '/documentos/'
+      preLoaderRoute: typeof AuthDocumentosIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/documentos/$id': {
+      id: '/_auth/documentos/$id'
+      path: '/documentos/$id'
+      fullPath: '/documentos/$id'
+      preLoaderRoute: typeof AuthDocumentosIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/documentos/novo': {
+      id: '/_auth/documentos/novo'
+      path: '/documentos/novo'
+      fullPath: '/documentos/novo'
+      preLoaderRoute: typeof AuthDocumentosNovoRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/documentos/solicitacoes': {
+      id: '/_auth/documentos/solicitacoes'
+      path: '/documentos/solicitacoes'
+      fullPath: '/documentos/solicitacoes'
+      preLoaderRoute: typeof AuthDocumentosSolicitacoesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/historico/': {
+      id: '/_auth/historico/'
+      path: '/historico'
+      fullPath: '/historico/'
+      preLoaderRoute: typeof AuthHistoricoIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
+interface AuthRouteChildren {
+  AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthDocumentosIdRoute: typeof AuthDocumentosIdRoute
+  AuthDocumentosNovoRoute: typeof AuthDocumentosNovoRoute
+  AuthDocumentosSolicitacoesRoute: typeof AuthDocumentosSolicitacoesRoute
+  AuthDocumentosIndexRoute: typeof AuthDocumentosIndexRoute
+  AuthHistoricoIndexRoute: typeof AuthHistoricoIndexRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthDashboardRoute: AuthDashboardRoute,
+  AuthDocumentosIdRoute: AuthDocumentosIdRoute,
+  AuthDocumentosNovoRoute: AuthDocumentosNovoRoute,
+  AuthDocumentosSolicitacoesRoute: AuthDocumentosSolicitacoesRoute,
+  AuthDocumentosIndexRoute: AuthDocumentosIndexRoute,
+  AuthHistoricoIndexRoute: AuthHistoricoIndexRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
