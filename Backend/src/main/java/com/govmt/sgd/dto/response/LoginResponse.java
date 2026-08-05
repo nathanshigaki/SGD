@@ -1,6 +1,6 @@
 package com.govmt.sgd.dto.response;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 public record LoginResponse(
@@ -9,5 +9,5 @@ public record LoginResponse(
     UUID id,
     String nome,
     String email,
-    Set<String> permissoes
+    List<String> permissoes
 ) {}

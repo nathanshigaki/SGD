@@ -5,6 +5,17 @@ import { decodeJwt, isJwtExpired } from '@/lib/jwt'
 export interface AuthUser {
   email: string
   permissoes: Array<string>
+  nome?: string 
+  id?: string
+}
+
+interface LoginResponseData {
+  token: string
+  expiresIn: number
+  id: string
+  nome: string
+  email: string
+  permissoes: string[]
 }
 
 function userFromToken(token: string | null): AuthUser | null {
@@ -41,7 +52,10 @@ export function isAuthenticated(): boolean {
 }
 
 export async function login(email: string, senha: string): Promise<AuthUser> {
-  const { data: token } = await api.post<string>('/login', { email, senha })
+  const response = await api.post<LoginResponseData>('/login', { email, senha })
+  
+  const token = response.data.token
+  
   const user = userFromToken(token)
 
   if (!user) {

@@ -9,6 +9,6 @@ VALUES
   (
     'Usuário',
     'usuario@seplag.mt.gov.br',
-    '$2a$10$Ua6bI8M5k6z1.R2f5a8r8uW9L4M3N2O1P0Q9R8S7T6U5V4W3X2Y1Z',
+    '$2y$10$kBnt5lDqO8TwKlRjmKxyA..rEwmoE6zN37Q8EI12pMuhCut94R1E.',
     ARRAY['DOCUMENTO:LER', 'DOCUMENTO:CRIAR', 'DOCUMENTO:ATUALIZAR', 'CONTA:ATIVA']
   )
