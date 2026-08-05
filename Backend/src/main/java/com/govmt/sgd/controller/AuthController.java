@@ -11,7 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.LoginRequest;
 import com.govmt.sgd.dto.request.UsuarioRequest;
+import com.govmt.sgd.dto.response.LoginResponse;
 import com.govmt.sgd.dto.response.UsuarioResponse;
+import com.govmt.sgd.mappers.AuthMapper;
+import com.govmt.sgd.model.UserAuthenticated;
+import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.service.JwtService;
 import com.govmt.sgd.service.UsuarioService;
 
@@ -30,6 +34,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UsuarioService usuarioService;
+    private final AuthMapper authMapper;
 
     @PostMapping("/login")
     @Operation(
@@ -41,13 +46,21 @@ public class AuthController {
         @ApiResponse(responseCode = "400", description = "Corpo da requisição inválido"),
         @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
     })
-    public String authenticate(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest request) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.email(), request.senha());
         
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         
-        return jwtService.generateToken(authentication);
+        UserAuthenticated userAuthenticated = (UserAuthenticated) authentication.getPrincipal();
+        Usuario usuario = userAuthenticated.getUsuario();
+        
+        String token = jwtService.generateToken(authentication);
+        Long expiresIn = jwtService.getExpiresIn(); // Em segundos
+
+        LoginResponse response = authMapper.toLoginResponse(usuario, token, expiresIn);
+        
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/cadastrar")

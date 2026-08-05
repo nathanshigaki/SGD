@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtService {
 
     private final JwtEncoder jwtEncoder;
+    public static final long EXPIRES_IN_SECONDS = 3600 * 24L;
 
     public String generateToken(Authentication authentication) {
         Instant now = Instant.now();
@@ -35,5 +36,8 @@ public class JwtService {
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+    public long getExpiresIn() {
+        return EXPIRES_IN_SECONDS;
     }
 }
