@@ -16,8 +16,8 @@ public record DocumentoRequest(
 
     @NotBlank(message = "O identificador é obrigatório")
     @Pattern(
-        regexp = "^[a-zA-Z]{3,5}-[a-zA-Z]{3}-\\d{4}/\\d{5}(-[a-zA-Z0-9]+)?$", 
-        message = "O formato deve ser XXX-XXX-0000/00000"
+        regexp = "^[a-zA-Z]{3,7}-PRO-\\d{4}/\\d{5}(\\.[a-zA-Z0-9]+)?$", 
+        message = "O formato deve ser ORGAO-PRO-ANO/SEQUENCIAL"
     )
     String sigdoc, 
     LocalDateTime chegouEm,  

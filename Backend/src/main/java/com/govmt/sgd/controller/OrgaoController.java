@@ -65,7 +65,7 @@ public class OrgaoController {
         @ApiResponse(responseCode = "401", description = "Token ausente ou inválido"),
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
-    @PreAuthorize("hasAuthority('*:*')")
+    @PreAuthorize("hasAuthority('ORGAO:LER') or hasAuthority('*:*')")
     public ResponseEntity<PageResponse<OrgaoResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "nome", direction = Sort.Direction.DESC) Pageable pageable
@@ -84,7 +84,7 @@ public class OrgaoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado"),
         @ApiResponse(responseCode = "404", description = "Órgão não encontrado na base de dados")
     })
-    @PreAuthorize("hasAuthority('*:*')")
+    @PreAuthorize("hasAuthority('ORGAO:LER') or hasAuthority('*:*')")
     public ResponseEntity<OrgaoResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(orgaoService.findById(id));
     }

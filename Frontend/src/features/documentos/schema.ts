@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const sigdocRegex = /^[a-zA-Z]{3,5}-[a-zA-Z]{3}-\d{4}\/\d{5}(-[a-zA-Z0-9]+)?$/
+export const sigdocRegex = /^[a-zA-Z]{3,7}-PRO-\d{4}\/\d{5}(\.[a-zA-Z0-9]+)?$/
 
 const optionalText = z
   .string()
