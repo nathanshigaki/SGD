@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.OrgaoRequest;
 import com.govmt.sgd.dto.response.OrgaoResponse;
+import com.govmt.sgd.dto.response.PageResponse;
 import com.govmt.sgd.service.OrgaoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,11 +67,11 @@ public class OrgaoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     @PreAuthorize("hasAuthority('*:*')")
-    public ResponseEntity<Page<OrgaoResponse>> getAll(
+    public ResponseEntity<PageResponse<OrgaoResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "nome", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(orgaoService.getAll(pageable));
+        return ResponseEntity.ok(PageResponse.of(orgaoService.getAll(pageable)));
     }
 
     @GetMapping("/{id}")

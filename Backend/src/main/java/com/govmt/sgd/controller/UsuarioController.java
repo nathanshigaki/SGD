@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.UsuarioRequest;
+import com.govmt.sgd.dto.response.PageResponse;
 import com.govmt.sgd.dto.response.UsuarioResponse;
 import com.govmt.sgd.service.UsuarioService;
 
@@ -49,11 +50,11 @@ public class UsuarioController {
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     @PreAuthorize("hasAuthority('USUARIO:LER') or hasAuthority('*:*')")
-    public ResponseEntity<Page<UsuarioResponse>> getAllUsuarios(
+    public ResponseEntity<PageResponse<UsuarioResponse>> getAllUsuarios(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "nome", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(usuarioService.getAll(pageable));
+        return ResponseEntity.ok(PageResponse.of(usuarioService.getAll(pageable)));
     }
 
     @GetMapping("/{id}")

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.FeriadoRequest;
 import com.govmt.sgd.dto.response.FeriadoResponse;
+import com.govmt.sgd.dto.response.PageResponse;
 import com.govmt.sgd.service.FeriadoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,11 +61,11 @@ public class FeriadoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     @PreAuthorize("hasAuthority('*:*')")
-    public ResponseEntity<Page<FeriadoResponse>> getAll(
+    public ResponseEntity<PageResponse<FeriadoResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(feriadoService.getAll(pageable));
+        return ResponseEntity.ok(PageResponse.of(feriadoService.getAll(pageable)));
     }
 
     @GetMapping("/{id}")

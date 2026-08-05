@@ -2,6 +2,7 @@ import pandas as pd
 import psycopg2
 import os
 import math
+import unicodedata
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -15,6 +16,18 @@ DB_NAME = os.getenv("DB_NAME", "sgd_db")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASS = os.getenv("DB_PASSWORD", "postgres")
 
+def normalizar_cabecalho(texto):
+    """Remove acentos, espaços extras e deixa em minúsculo para evitar erros de casamento no Pandas."""
+    if pd.isna(texto):
+        return ""
+    texto = str(texto).strip().lower()
+    # Remove acentos (Ex: código -> codigo, situação -> situacao)
+    texto = "".join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
+    # Substitui quebras de linha e hifens por espaços simples
+    texto = texto.replace('\n', ' ').replace('-', ' ').replace('/', ' ')
+    # Remove espaços duplicados
+    return " ".join(texto.split())
+
 def limpar_texto(valor, max_len=None):
     if pd.isna(valor) or str(valor).strip().lower() in ['nan', 'none', '']:
         return None
@@ -26,7 +39,10 @@ def limpar_texto(valor, max_len=None):
 def limpar_data(valor):
     if pd.isna(valor):
         return None
-    return valor.to_pydatetime()
+    try:
+        return pd.to_datetime(valor).to_pydatetime()
+    except:
+        return None
 
 def migrar_dados():
     if not os.path.exists(EXCEL_PATH):
@@ -34,9 +50,15 @@ def migrar_dados():
         return
 
     print("📊 Lendo arquivo Excel...")
+    # ATENÇÃO: Se os cabeçalhos estiverem na linha 5 do Excel, mantenha header=4.
+    # Se estiverem na primeira linha da planilha, mude para header=0.
     df = pd.read_excel(EXCEL_PATH, sheet_name="FILA AQ-TI", header=4)
-    # Padroniza os nomes das colunas para minúsculo
-    df.columns = df.columns.astype(str).str.strip().str.lower().str.replace('\n', ' ')
+    
+    # Aplica a normalização rigorosa nos cabeçalhos da tabela do Excel
+    df.columns = [normalizar_cabecalho(col) for col in df.columns]
+    
+    print("📋 Colunas identificadas e mapeadas no Excel:")
+    print(list(df.columns))
 
     print("🔌 Conectando ao banco de dados...")
     try:
@@ -45,25 +67,18 @@ def migrar_dados():
         )
         cursor = conexao.cursor()
         
-        # 1. Carrega os órgãos do banco
         cursor.execute("SELECT acronimo, id FROM orgao WHERE acronimo IS NOT NULL")
         mapa_orgaos = {row[0].strip().upper().replace(" ", ""): row[1] for row in cursor.fetchall()}
         
-        # 2. Carrega as pessoas da tabela usuarios (Nome -> ID)
         cursor.execute("SELECT nome, id FROM usuarios")
         mapa_usuarios = {row[0].strip().lower(): row[1] for row in cursor.fetchall()}
         
         print(f"🏢 {len(mapa_orgaos)} órgãos carregados.")
-        print(f"👤 {len(mapa_usuarios)} usuários carregados do banco.")
+        print(f"👤 {len(mapa_usuarios)} usuários carregados.")
         
     except Exception as e:
         print(f"❌ Erro ao conectar no Postgres: {e}")
         return
-
-    if 'data entrada' in df.columns:
-        df['data entrada'] = pd.to_datetime(df['data entrada'], errors='coerce')
-    if 'data de conclusão' in df.columns:
-        df['data de conclusão'] = pd.to_datetime(df['data de conclusão'], errors='coerce')
 
     sucessos = 0
     erros = 0
@@ -72,17 +87,18 @@ def migrar_dados():
     print("🚀 Iniciando migração de registros...")
     
     for index, row in df.iterrows():
-        sigdoc = limpar_texto(row.get('código sigadoc'))
+        # Mapeamento usando as chaves normalizadas (sem acento, minúsculo, sem barras/hifens)
+        sigdoc = limpar_texto(row.get('codigo sigadoc'))
         
-        # Trava de segurança contra linhas de observação/lixo na planilha
-        if not sigdoc or len(sigdoc) > 60 or (sigdoc.count(' ') > 3 and not ' ' in sigdoc.split('-')[0]):
+        # Trava de segurança contra linhas vazias no fim do Excel
+        if not sigdoc:
             ignorados += 1
             continue
             
         sigdoc_upper = sigdoc.upper()
         prefixo_raw = sigdoc.split('-')[0].upper().strip().replace(" ", "")
         
-        # Regras de exceção dos Órgãos
+        # Regras de correspondência de Órgãos
         if "SEFAZ" in sigdoc_upper:
             prefixo_raw = "SEFAZ"
         elif "DETRAN" in sigdoc_upper:
@@ -98,66 +114,73 @@ def migrar_dados():
             
         orgao_id = mapa_orgaos.get(prefixo_raw, mapa_orgaos.get("SEPLAG"))
 
-        # ====================================================================
-        # LÓGICA DE BUSCA DE MÚLTIPLOS USUÁRIOS NA COLUNA "ANALISTA"
-        # ====================================================================
+        # Busca de usuários (Analistas)
         nome_excel = limpar_texto(row.get('analista')) 
         usuarios_ids_encontrados = []
-        
         if nome_excel:
             nome_excel_limpo = nome_excel.lower()
-            
-            # Varre o banco para identificar todos os analistas contidos na célula
             for nome_db, u_id in mapa_usuarios.items():
                 if nome_db in nome_excel_limpo:
                     usuarios_ids_encontrados.append(u_id)
 
-        # Tratamentos de Tipos
+        # Captura de Valores (Prioriza a coluna VALOR, senão tenta VALOR DA PROPOSTA)
+        valor_bruto = row.get('valor') if row.get('valor') is not None else row.get('valor da proposta')
         try:
-            valor = float(row.get('valor', 0))
+            valor = float(valor_bruto)
             if math.isnan(valor): valor = 0.0
         except (ValueError, TypeError):
             valor = 0.0
 
-        iniciado_bruto = limpar_texto(row.get('unnamed: 2'))
-        iniciado = True if iniciado_bruto in ['1', '1.0'] else False
+        # Tratamento de Datas usando os novos cabeçalhos da sua lista
+        chegou_em = limpar_data(row.get('data entrada sigadoc'))
+        concluiu_em = limpar_data(row.get('data de conclusao'))
 
-        condes_bruto = limpar_texto(row.get('autorização condes'))
+        # Cálculo dinâmico dos Dias em Espera
+        em_espera = 0
+        if chegou_em:
+            data_referencia = concluiu_em if concluiu_em else datetime.now()
+            # Zera a informação de horas/minutos para focar apenas no intervalo de dias corridos
+            diferenca = data_referencia.date() - chegou_em.date()
+            em_espera = max(0, diferenca.days)
+
+        # Regras booleanas baseadas nas suas colunas
+        iniciado_bruto = limpar_texto(row.get('prioridade')) # Ajuste se houver outra lógica para 'iniciado'
+        iniciado = True if iniciado_bruto in ['1', '1.0', 'SIM', 'sim'] else False
+
+        condes_bruto = limpar_texto(row.get('autorizacao condes'))
         condes = True if (condes_bruto and condes_bruto.lower() == 'sim') or (valor >= 400000) else False
 
-        chegou_em = limpar_data(row.get('data entrada'))
-        concluiu_em = limpar_data(row.get('data de conclusão'))
-
+        # Demais campos de texto baseados nas suas colunas
         resumo = limpar_texto(row.get('apelido'))
-        caracterizacao_ti = limpar_texto(row.get('caracterização de ti'))
+        caracterizacao_ti = limpar_texto(row.get('caracterizacao de ti'))
         objeto = limpar_texto(row.get('objeto'))
-        recomendacao = limpar_texto(row.get('observação'))
+        recomendacao = limpar_texto(row.get('observacao'))
         parecer_final = limpar_texto(row.get('parecer final'))
+        tipo_contratacao = limpar_texto(row.get('tipo contratacao'), 255)
         
-        tipo_contratacao = limpar_texto(row.get('tipo contratação'), 255)
-        situacao = limpar_texto(row.get('situação'), 255)
-        if not situacao: situacao = "EM_ANALISE"
+        situacao = limpar_texto(row.get('situacao'), 255)
+        if not situacao: 
+            situacao = "CONCLUIDO" if concluiu_em else "EM_ANALISE"
 
         try:
-            # === A. INSERIR DOCUMENTO ===
+            # A. Inserção do Documento no Banco
             query_doc = """
                 INSERT INTO documentos 
-                (orgao_id, sigdoc, chegou_em, concluiu_em, valor, situacao, 
+                (orgao_id, sigdoc, chegou_em, concluiu_em, em_espera, valor, situacao, 
                 caracterizacao_ti, iniciado, condes, resumo, tipo_contratacao, 
                 objeto, recomendacao, parecer_final)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id;
             """
             cursor.execute(query_doc, (
-                orgao_id, sigdoc, chegou_em, concluiu_em, valor, situacao,
+                orgao_id, sigdoc, chegou_em, concluiu_em, em_espera, valor, situacao,
                 caracterizacao_ti, iniciado, condes, resumo, tipo_contratacao,
                 objeto, recomendacao, parecer_final
             ))
             
             doc_id = cursor.fetchone()[0]
 
-            # === B. VINCULAR NA TABELA DE RELACIONAMENTO (documento_usuarios) ===
-            # Insere uma linha para cada analista mapeado dinamicamente
+            # B. Vinculação de Analistas
             if usuarios_ids_encontrados:
                 for u_id in usuarios_ids_encontrados:
                     query_relacao = """
@@ -168,11 +191,7 @@ def migrar_dados():
             
             conexao.commit()
             sucessos += 1
-            
-            if usuarios_ids_encontrados:
-                print(f"✅ {sigdoc} salvo e VINCULADO a {len(usuarios_ids_encontrados)} analista(s) ('{nome_excel}').")
-            else:
-                print(f"✅ {sigdoc} salvo (Sem usuário vinculado - Nome na planilha: '{nome_excel}').")
+            print(f"✅ {sigdoc} inserido. Dias em espera: {em_espera}. Valor: R$ {valor:.2f}")
 
         except Exception as e:
             conexao.rollback()
@@ -183,8 +202,8 @@ def migrar_dados():
     conexao.close()
     print("\n🏁 MIGRACAO CONCLUÍDA!")
     print(f"✔️ Documentos salvos com sucesso: {sucessos}")
-    print(f"⚠️ Linhas ignoradas por formato inválido: {ignorados}")
-    print(f"❌ Registros com falha: {erros}")
+    print(f"⚠️ Linhas em branco ignoradas: {ignorados}")
+    print(f"❌ Registros com falha operacional: {erros}")
 
 if __name__ == "__main__":
     migrar_dados()

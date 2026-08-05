@@ -3,7 +3,7 @@ VALUES
   (
     'Admin',
     'admin@seplag.mt.gov.br',
-    '$2a$10$E217a3fG/5oT08I582R4ne/9pY5M9pLz4UqE6M3a3X.9K1.8k1/2S',
+    '$2y$10$w71amguGH76LxPPC66OBOeTBtkAneg51aKka5vb3sPDTqtAM450SS',
     ARRAY['*:*', 'CONTA:ATIVA']
   ),
   (

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.response.HistoricoResponse;
+import com.govmt.sgd.dto.response.PageResponse;
 import com.govmt.sgd.service.HistoricoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,11 +44,11 @@ public class HistoricoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
     @PreAuthorize("hasAuthority('HISTORICO:LER') or hasAuthority('*:*')") 
-    public ResponseEntity<Page<HistoricoResponse>> getAll(
+    public ResponseEntity<PageResponse<HistoricoResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
     ){
-        return ResponseEntity.ok(historicoService.getAll(pageable));
+        return ResponseEntity.ok(PageResponse.of(historicoService.getAll(pageable)));
     }
 
     @GetMapping("/buscar")
@@ -61,7 +62,7 @@ public class HistoricoController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
     @PreAuthorize("hasAuthority('HISTORICO:LER') or hasAuthority('*:*')") 
-    public ResponseEntity<Page<HistoricoResponse>> pesquisarHistorico(
+    public ResponseEntity<PageResponse<HistoricoResponse>> pesquisarHistorico(
         @RequestParam(required = false) UUID documentoId,
         @RequestParam(required = false) UUID usuarioId,
         @RequestParam(required = false) UUID aprovadorId,
@@ -71,6 +72,6 @@ public class HistoricoController {
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable) 
     {    
-        return ResponseEntity.ok(historicoService.buscarHistoricoComFiltros(documentoId, usuarioId, aprovadorId, situacao, dataInicio, dataFim, pageable));
+        return ResponseEntity.ok(PageResponse.of(historicoService.buscarHistoricoComFiltros(documentoId, usuarioId, aprovadorId, situacao, dataInicio, dataFim, pageable)));
     }
 }

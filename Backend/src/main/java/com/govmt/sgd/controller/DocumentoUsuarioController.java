@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.govmt.sgd.dto.request.DocumentoUsuarioRequest;
 import com.govmt.sgd.dto.response.DocumentoUsuarioResponse;
+import com.govmt.sgd.dto.response.PageResponse;
 import com.govmt.sgd.service.DocumentoUsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,11 +68,11 @@ public class DocumentoUsuarioController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
     @PreAuthorize("hasAuthority('DOCUMENTO_USUARIO:LER') or hasAuthority('*:*')")
-    public ResponseEntity<Page<DocumentoUsuarioResponse>> getAll(
+    public ResponseEntity<PageResponse<DocumentoUsuarioResponse>> getAll(
         @Parameter(hidden = true)
         @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(documentoUsuarioService.getAll(pageable));
+        return ResponseEntity.ok(PageResponse.of(documentoUsuarioService.getAll(pageable)));
     }
 
     @GetMapping("/buscar")
@@ -85,14 +86,14 @@ public class DocumentoUsuarioController {
         @ApiResponse(responseCode = "403", description = "Acesso negado - falta de autorização")
     })
     @PreAuthorize("hasAuthority('LER_DOCUMENTO') or hasAuthority('*:*')")
-    public ResponseEntity<Page<DocumentoUsuarioResponse>> buscarComFiltros(
+    public ResponseEntity<PageResponse<DocumentoUsuarioResponse>> buscarComFiltros(
             @RequestParam(required = false) UUID documentoId,
             @RequestParam(required = false) UUID usuarioId,
             @RequestParam(required = false) String cargo,
             @Parameter(hidden = true)
             @PageableDefault(size = 10, page = 0, sort = "criadoEm", direction = Sort.Direction.DESC) Pageable pageable) {
         
-        return ResponseEntity.ok(documentoUsuarioService.buscarComFiltros(documentoId, usuarioId, cargo, pageable));
+        return ResponseEntity.ok(PageResponse.of(documentoUsuarioService.buscarComFiltros(documentoId, usuarioId, cargo, pageable)));
     }
 
     @GetMapping("/{id}")
