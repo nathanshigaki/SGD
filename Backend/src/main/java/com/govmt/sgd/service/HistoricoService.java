@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import com.govmt.sgd.model.Documento;
 import com.govmt.sgd.model.Historico;
 import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.HistoricoRepository;
+import com.govmt.sgd.repository.specification.HistoricoSpecs;
 
 import lombok.RequiredArgsConstructor;
 
@@ -75,8 +77,10 @@ public class HistoricoService {
             LocalDateTime dataFim, 
             Pageable pageable) {
 
-        return historicoRepository.buscarComFiltros(
-                documentoId, usuarioId, aprovadorId, situacao, dataInicio, dataFim, pageable)
-                .map(historicoMapper::toResponseFromHistorico);
+        Specification<Historico> spec = HistoricoSpecs.comFiltros(
+                documentoId, usuarioId, aprovadorId, situacao, dataInicio, dataFim
+        );
+
+        return historicoRepository.findAll(spec, pageable).map(historicoMapper::toResponseFromHistorico);
     }
 }

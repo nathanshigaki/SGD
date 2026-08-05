@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import com.govmt.sgd.model.Historico;
 import com.govmt.sgd.model.Usuario;
 import com.govmt.sgd.repository.DocumentoRepository;
 import com.govmt.sgd.repository.HistoricoRepository;
+import com.govmt.sgd.repository.specification.DocumentoSpecs;
 
 import lombok.RequiredArgsConstructor;
 
@@ -69,8 +71,9 @@ public class DocumentoService {
             Boolean condes, 
             String parecerFinal, 
             Pageable pageable) {
-        return documentoRepository.buscarComFiltros(sigdoc, situacao, chegouEm, condes, parecerFinal, pageable)
-                .map(documentoMapper::toResponseFromDocumento);
+        Specification<Documento> spec = DocumentoSpecs.comFiltros(sigdoc, situacao, chegouEm, condes, parecerFinal);
+        
+        return documentoRepository.findAll(spec, pageable).map(documentoMapper::toResponseFromDocumento);
     }
 
     @Transactional(readOnly = true)

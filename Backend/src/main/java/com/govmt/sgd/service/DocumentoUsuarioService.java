@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import com.govmt.sgd.exception.NotFoundException;
 import com.govmt.sgd.mappers.DocumentoUsuarioMapper;
 import com.govmt.sgd.model.DocumentoUsuario;
 import com.govmt.sgd.repository.DocumentoUsuarioRepository;
+import com.govmt.sgd.repository.specification.DocumentoUsuarioSpecs;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,8 +48,9 @@ public class DocumentoUsuarioService {
         String cargo,
         Pageable pageable
     ){
-        return documentoUsuarioRepository.buscarComFiltros(documentoId, usuarioId, cargo, pageable)
-                .map(documentoUsuarioMapper::toResponseFromDocumentoUsuario);
+        Specification<DocumentoUsuario> spec = DocumentoUsuarioSpecs.comFiltros(documentoId, usuarioId, cargo);
+        
+        return documentoUsuarioRepository.findAll(spec, pageable).map(documentoUsuarioMapper::toResponseFromDocumentoUsuario);
     }
 
     @Transactional(readOnly = true)
