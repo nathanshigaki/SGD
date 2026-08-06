@@ -44,17 +44,84 @@ def limpar_data(valor):
     except:
         return None
 
+# =====================================================================
+# MAPAS DE PADRONIZAÇÃO (Baseados no constants.ts do Frontend)
+# =====================================================================
+
+MAPA_SITUACAO = {
+    'em analise': 'EM_ANALISE',
+    'pendente': 'PENDENTE',
+    'aprovado': 'APROVADO',
+    'concluido': 'CONCLUIDO',
+    'aguardando validacao': 'AGUARDANDO_VALIDACAO',
+    'tramitado': 'TRAMITADO',
+    'devolvido': 'DEVOLVIDO',
+    'aguardando retorno': 'AGUARDANDO_RETORNO'
+}
+
+MAPA_CARACTERIZACAO = {
+    'analise de dados': 'ANALISE_DADOS_APRENDIZADO_MAQUINA_INTELIGENCIA_ARTIFICIAL',
+    'computacao em ti': 'COMPUTACAO_TI',
+    'computacao em nuvem': 'COMPUTACAO_NUVEM',
+    'comunicacao de dados': 'COMUNICACAO_DADOS',
+    'consultoria': 'CONSULTORIA_TI',
+    'desenvolvimento e susten': 'DESENVOLVIMENTO_SUSTENTACAO_SISTEMAS', # Pega o erro de digitação da planilha (Sustenção)
+    'hospedagem de sistemas': 'HOSPEDAGEM_SISTEMAS',
+    'impressao': 'IMPRESSAO_DIGITALIZACAO',
+    'infraestrutura de ti': 'INFRAESTRUTURA_TI',
+    'internet das coisas': 'IOT',
+    'materiais e equipamentos': 'MATERIAIS_EQUIPAMENTOS_TI',
+    'processo seletivo': 'PROCESSO_SELETIVO',
+    'seguranca da informatica': 'SEGURANCA_INFORMATICA_PRIVACIDADE',
+    'software de prateleira': 'SOFTWARE_PRATELEIRA',
+    'software e aplicativos': 'SOFTWARE_APLICATIVOS',
+    'suporte e atendimento': 'SUPORTE_ATENDIMENTO_USUARIO_TI'
+}
+
+MAPA_TIPO_CONTRATACAO = {
+    'pregao eletronico': 'PREGAO_ELETRONICO',
+    'adesao a ata': 'ADESAO_ATA',
+    'inexigib': 'INEXIGIBILIDADE_LICITACAO', # Pega inexigibilidade e suas variações com erro de digitação
+    'compra direta': 'COMPRA_DIRETA',
+    'dispensa': 'DISPENSA_LICITACAO',
+    'sbqc': 'SBQC',
+    'gn2350': 'GN2350-15',
+    'bid': 'GN2350-15'
+}
+
+MAPA_PARECER = {
+    'favoravel com ressalva': 'FAVORAVEL_COM_RESSALVA', # Pega as variações de plural (ressalvas) da planilha
+    'nao favoravel': 'NAO_FAVORAVEL',
+    'desfavoravel': 'NAO_FAVORAVEL',
+    'favoravel': 'FAVORAVEL',
+    'devolvido': 'DEVOLVIDO',
+    'tramitado': 'TRAMITADO'
+}
+
+def padronizar_enum(valor_bruto, mapa):
+    """Varre o mapa e tenta encontrar correspondência parcial numa string já limpa de acentos e maiúsculas."""
+    if pd.isna(valor_bruto) or str(valor_bruto).strip() == '':
+        return None
+        
+    texto_limpo = normalizar_cabecalho(str(valor_bruto))
+    
+    for chave_parcial, valor_constante in mapa.items():
+        if chave_parcial in texto_limpo:
+            return valor_constante
+            
+    return None # Se for "Não se aplica" ou outra coisa não prevista, retorna Nulo pro banco.
+
+# =====================================================================
+
+
 def migrar_dados():
     if not os.path.exists(EXCEL_PATH):
         print(f"❌ Erro: Arquivo {EXCEL_PATH} não encontrado.")
         return
 
     print("📊 Lendo arquivo Excel...")
-    # ATENÇÃO: Se os cabeçalhos estiverem na linha 5 do Excel, mantenha header=4.
-    # Se estiverem na primeira linha da planilha, mude para header=0.
     df = pd.read_excel(EXCEL_PATH, sheet_name="FILA AQ-TI", header=4)
     
-    # Aplica a normalização rigorosa nos cabeçalhos da tabela do Excel
     df.columns = [normalizar_cabecalho(col) for col in df.columns]
     
     print("📋 Colunas identificadas e mapeadas no Excel:")
@@ -73,9 +140,6 @@ def migrar_dados():
         cursor.execute("SELECT nome, id FROM usuarios")
         mapa_usuarios = {row[0].strip().lower(): row[1] for row in cursor.fetchall()}
         
-        print(f"🏢 {len(mapa_orgaos)} órgãos carregados.")
-        print(f"👤 {len(mapa_usuarios)} usuários carregados.")
-        
     except Exception as e:
         print(f"❌ Erro ao conectar no Postgres: {e}")
         return
@@ -87,10 +151,8 @@ def migrar_dados():
     print("🚀 Iniciando migração de registros...")
     
     for index, row in df.iterrows():
-        # Mapeamento usando as chaves normalizadas (sem acento, minúsculo, sem barras/hifens)
         sigdoc = limpar_texto(row.get('codigo sigadoc'))
         
-        # Trava de segurança contra linhas vazias no fim do Excel
         if not sigdoc:
             ignorados += 1
             continue
@@ -98,7 +160,6 @@ def migrar_dados():
         sigdoc_upper = sigdoc.upper()
         prefixo_raw = sigdoc.split('-')[0].upper().strip().replace(" ", "")
         
-        # Regras de correspondência de Órgãos
         if "SEFAZ" in sigdoc_upper:
             prefixo_raw = "SEFAZ"
         elif "DETRAN" in sigdoc_upper:
@@ -114,7 +175,6 @@ def migrar_dados():
             
         orgao_id = mapa_orgaos.get(prefixo_raw, mapa_orgaos.get("SEPLAG"))
 
-        # Busca de usuários (Analistas)
         nome_excel = limpar_texto(row.get('analista')) 
         usuarios_ids_encontrados = []
         if nome_excel:
@@ -123,7 +183,6 @@ def migrar_dados():
                 if nome_db in nome_excel_limpo:
                     usuarios_ids_encontrados.append(u_id)
 
-        # Captura de Valores (Prioriza a coluna VALOR, senão tenta VALOR DA PROPOSTA)
         valor_bruto = row.get('valor') if row.get('valor') is not None else row.get('valor da proposta')
         try:
             valor = float(valor_bruto)
@@ -131,39 +190,38 @@ def migrar_dados():
         except (ValueError, TypeError):
             valor = 0.0
 
-        # Tratamento de Datas usando os novos cabeçalhos da sua lista
         chegou_em = limpar_data(row.get('data entrada sigadoc'))
         concluiu_em = limpar_data(row.get('data de conclusao'))
 
-        # Cálculo dinâmico dos Dias em Espera
         em_espera = 0
         if chegou_em:
             data_referencia = concluiu_em if concluiu_em else datetime.now()
-            # Zera a informação de horas/minutos para focar apenas no intervalo de dias corridos
             diferenca = data_referencia.date() - chegou_em.date()
             em_espera = max(0, diferenca.days)
 
-        # Regras booleanas baseadas nas suas colunas
-        iniciado_bruto = limpar_texto(row.get('prioridade')) # Ajuste se houver outra lógica para 'iniciado'
+        iniciado_bruto = limpar_texto(row.get('prioridade'))
         iniciado = True if iniciado_bruto in ['1', '1.0', 'SIM', 'sim'] else False
 
         condes_bruto = limpar_texto(row.get('autorizacao condes'))
         condes = True if (condes_bruto and condes_bruto.lower() == 'sim') or (valor >= 400000) else False
 
-        # Demais campos de texto baseados nas suas colunas
         resumo = limpar_texto(row.get('apelido'))
-        caracterizacao_ti = limpar_texto(row.get('caracterizacao de ti'))
         objeto = limpar_texto(row.get('objeto'))
         recomendacao = limpar_texto(row.get('observacao'))
-        parecer_final = limpar_texto(row.get('parecer final'))
-        tipo_contratacao = limpar_texto(row.get('tipo contratacao'), 255)
         
-        situacao = limpar_texto(row.get('situacao'), 255)
+        # ----------------------------------------------------------------------
+        # APLICAÇÃO DOS NOVOS MAPEAMENTOS (Baseados no Constants)
+        # ----------------------------------------------------------------------
+        caracterizacao_ti = padronizar_enum(row.get('caracterizacao de ti'), MAPA_CARACTERIZACAO)
+        tipo_contratacao = padronizar_enum(row.get('tipo contratacao'), MAPA_TIPO_CONTRATACAO)
+        parecer_final = padronizar_enum(row.get('parecer final'), MAPA_PARECER)
+        
+        situacao = padronizar_enum(row.get('situacao'), MAPA_SITUACAO)
+        # Regra de negócio de fallback caso a situação venha vazia
         if not situacao: 
             situacao = "CONCLUIDO" if concluiu_em else "EM_ANALISE"
 
         try:
-            # A. Inserção do Documento no Banco
             query_doc = """
                 INSERT INTO documentos 
                 (orgao_id, sigdoc, chegou_em, concluiu_em, em_espera, valor, situacao, 
@@ -180,7 +238,6 @@ def migrar_dados():
             
             doc_id = cursor.fetchone()[0]
 
-            # B. Vinculação de Analistas
             if usuarios_ids_encontrados:
                 for u_id in usuarios_ids_encontrados:
                     query_relacao = """
@@ -191,7 +248,7 @@ def migrar_dados():
             
             conexao.commit()
             sucessos += 1
-            print(f"✅ {sigdoc} inserido. Dias em espera: {em_espera}. Valor: R$ {valor:.2f}")
+            print(f"✅ {sigdoc} inserido. Situação: {situacao} | Tipo: {tipo_contratacao}")
 
         except Exception as e:
             conexao.rollback()
