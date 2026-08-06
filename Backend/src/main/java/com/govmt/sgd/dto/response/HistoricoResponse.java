@@ -11,6 +11,7 @@ public record HistoricoResponse(
     UsuarioInfo usuario,
     UsuarioInfo aprovador,
     String situacao,
+    String documentoSigdoc,
     String acao,
     ValoresHistorico valores,
     LocalDateTime criadoEm

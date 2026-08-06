@@ -180,6 +180,7 @@ public class DocumentoService {
         solicitacaoPendente.setAprovador(aprovador);
         
         if (!aprovado) {
+            solicitacaoPendente.setSituacao("REJEITADO");
             historicoService.saveHistorico(
                 solicitacaoPendente.getDocumento(), 
                 solicitacaoPendente.getUsuario(),

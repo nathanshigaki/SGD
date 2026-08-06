@@ -35,6 +35,7 @@ export interface Historico {
   usuario: HistoricoUsuarioInfo
   aprovador: HistoricoUsuarioInfo | null
   situacao: string
+  documentoSigdoc: string
   acao: string
   valores: ValoresHistorico
   criadoEm: string

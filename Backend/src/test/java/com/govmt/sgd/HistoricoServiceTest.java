@@ -72,7 +72,7 @@ class HistoricoServiceTest {
         when(historicoRepository.save(any(Historico.class))).thenReturn(historicoSalvo);
         
         HistoricoResponse responseMock = new HistoricoResponse(
-            UUID.randomUUID(), null, null, null, "PENDENTE_APROVACAO", "CRIAR_DOCUMENTO", null, null
+            UUID.randomUUID(), null, null, null, "PENDENTE_APROVACAO", "DOC-TESTE-0001", "CRIAR_DOCUMENTO", null, null
         );
         when(historicoMapper.toResponseFromHistorico(historicoSalvo)).thenReturn(responseMock);
 

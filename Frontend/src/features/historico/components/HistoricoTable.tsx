@@ -76,6 +76,7 @@ export function HistoricoTable({ historico, mostrarDocumento = true }: Historico
               <TableCell>{formatDateTime(registro.criadoEm)}</TableCell>
               {mostrarDocumento && (
                 <TableCell>
+                  {/* Se o documento ainda existir no banco, exibe como Link */}
                   {registro.documento ? (
                     <Button
                       variant="link"
@@ -86,10 +87,13 @@ export function HistoricoTable({ historico, mostrarDocumento = true }: Historico
                         <Link to="/documentos/$id" params={{ id: registro.documento.id }} />
                       }
                     >
-                      {registro.documento.sigdoc}
+                      {registro.documentoSigdoc}
                     </Button>
                   ) : (
-                    <span className="text-muted-foreground">Novo documento</span>
+                    /* Se foi excluído (documento == null), exibe apenas a string solta */
+                    <span className="text-muted-foreground font-medium">
+                      {registro.documentoSigdoc || 'Documento Excluído'}
+                    </span>
                   )}
                 </TableCell>
               )}
@@ -116,7 +120,8 @@ export function HistoricoTable({ historico, mostrarDocumento = true }: Historico
           <DialogHeader>
             <DialogTitle>
               {selecionado && (acaoLabels[selecionado.acao] ?? selecionado.acao)}
-              {selecionado?.documento && ` — ${selecionado.documento.sigdoc}`}
+              {/* Ajustado também o título do modal para ler a string fixa */}
+              {selecionado?.documentoSigdoc && ` — ${selecionado.documentoSigdoc}`}
             </DialogTitle>
           </DialogHeader>
           {selecionado && (

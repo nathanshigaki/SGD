@@ -46,5 +46,6 @@ export const PARECER_OPTIONS = [
   { label: 'Favorável', value: 'FAVORAVEL' },
   { label: 'Favorável com ressalva', value: 'FAVORAVEL_COM_RESSALVA' },
   { label: 'Não Favorável', value: 'NAO_FAVORAVEL' },
-  { label: 'Devolvido', value: 'DEVOlVIDO' },
+  { label: 'Devolvido', value: 'DEVOLVIDO' },
+  { label: 'Tramitado', value: 'TRAMITADO' },
 ]

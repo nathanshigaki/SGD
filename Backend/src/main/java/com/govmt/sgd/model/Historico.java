@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -38,6 +39,9 @@ public class Historico {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "documento_id")
     private Documento documento;
+
+    @Formula("(SELECT d.sigdoc FROM documentos d WHERE d.id = documento_id)")
+    private String documentoSigdoc;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
