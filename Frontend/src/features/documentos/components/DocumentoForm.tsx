@@ -18,6 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  SITUACAO_OPTIONS,
+  CARACTERIZACAO_TI_OPTIONS,
+  TIPO_CONTRATACAO_OPTIONS,
+  PARECER_OPTIONS,
+} from '../constants'
 
 interface DocumentoFormProps {
   documento?: Documento
@@ -69,6 +75,14 @@ function defaultValuesFromDocumento(documento?: Documento): DocumentoFormValues 
     parecerFinal: documento.parecerFinal ?? '',
   }
 }
+function sortOptions(options: { label: string; value: string }[]) {
+  const placeholder = options.filter((opt) => !opt.value)
+  const validOptions = options.filter((opt) => opt.value)
+
+  validOptions.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
+
+  return [...placeholder, ...validOptions]
+}
 
 export function DocumentoForm({ documento, onSubmit, isSubmitting }: DocumentoFormProps) {
   const { orgaos, isLoading: carregandoOrgaos, podeListar: podeListarOrgaos } = useOrgaosOptions()
@@ -80,8 +94,15 @@ export function DocumentoForm({ documento, onSubmit, isSubmitting }: DocumentoFo
 
   const orgaoItems = [
     { label: 'Selecione um órgão', value: null },
-    ...orgaos.map((orgao) => ({ label: `${orgao.acronimo} — ${orgao.nome}`, value: orgao.id })),
+    ...orgaos
+      .map((orgao) => ({ label: `${orgao.acronimo} — ${orgao.nome}`, value: orgao.id }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR')),
   ]
+
+  const situacaoOptions = sortOptions(SITUACAO_OPTIONS)
+  const caracterizacaoOptions = sortOptions(CARACTERIZACAO_TI_OPTIONS)
+  const tipoContratacaoOptions = sortOptions(TIPO_CONTRATACAO_OPTIONS)
+  const parecerOptions = sortOptions(PARECER_OPTIONS)
 
   const submit = form.handleSubmit((values) => {
     onSubmit({
@@ -191,24 +212,120 @@ export function DocumentoForm({ documento, onSubmit, isSubmitting }: DocumentoFo
             <FieldError errors={[form.formState.errors.valor]} />
           </Field>
 
-          <Field>
+          <Field data-invalid={!!form.formState.errors.situacao}>
             <FieldLabel htmlFor="situacao">Situação</FieldLabel>
-            <Input id="situacao" {...form.register('situacao')} />
+            <Controller
+              control={form.control}
+              name="situacao"
+              render={({ field }) => (
+                <Select
+                  items={situacaoOptions}
+                  value={field.value || null}
+                  onValueChange={(value: string | null) => field.onChange(value ?? '')}
+                >
+                  <SelectTrigger id="situacao" aria-invalid={!!form.formState.errors.situacao}>
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {situacaoOptions.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FieldError errors={[form.formState.errors.situacao]} />
           </Field>
 
-          <Field>
+          <Field data-invalid={!!form.formState.errors.caracterizacaoTi}>
             <FieldLabel htmlFor="caracterizacaoTi">Caracterização TI</FieldLabel>
-            <Input id="caracterizacaoTi" {...form.register('caracterizacaoTi')} />
+            <Controller
+              control={form.control}
+              name="caracterizacaoTi"
+              render={({ field }) => (
+                <Select
+                  items={caracterizacaoOptions}
+                  value={field.value || null}
+                  onValueChange={(value: string | null) => field.onChange(value ?? '')}
+                >
+                  <SelectTrigger id="caracterizacaoTi" aria-invalid={!!form.formState.errors.caracterizacaoTi}>
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {caracterizacaoOptions.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FieldError errors={[form.formState.errors.caracterizacaoTi]} />
           </Field>
 
-          <Field>
+          <Field data-invalid={!!form.formState.errors.tipoContratacao}>
             <FieldLabel htmlFor="tipoContratacao">Tipo de contratação</FieldLabel>
-            <Input id="tipoContratacao" {...form.register('tipoContratacao')} />
+            <Controller
+              control={form.control}
+              name="tipoContratacao"
+              render={({ field }) => (
+                <Select
+                  items={tipoContratacaoOptions}
+                  value={field.value || null}
+                  onValueChange={(value: string | null) => field.onChange(value ?? '')}
+                >
+                  <SelectTrigger id="tipoContratacao" aria-invalid={!!form.formState.errors.tipoContratacao}>
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {tipoContratacaoOptions.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FieldError errors={[form.formState.errors.tipoContratacao]} />
           </Field>
 
-          <Field>
+          <Field data-invalid={!!form.formState.errors.parecerFinal}>
             <FieldLabel htmlFor="parecerFinal">Parecer final</FieldLabel>
-            <Input id="parecerFinal" {...form.register('parecerFinal')} />
+            <Controller
+              control={form.control}
+              name="parecerFinal"
+              render={({ field }) => (
+                <Select
+                  items={parecerOptions}
+                  value={field.value || null}
+                  onValueChange={(value: string | null) => field.onChange(value ?? '')}
+                >
+                  <SelectTrigger id="parecerFinal" aria-invalid={!!form.formState.errors.parecerFinal}>
+                    <SelectValue placeholder="Selecione o parecer..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {parecerOptions.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FieldError errors={[form.formState.errors.parecerFinal]} />
           </Field>
         </div>
 
