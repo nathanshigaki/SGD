@@ -5,7 +5,7 @@ import { PlusIcon } from 'lucide-react'
 
 import { useCan } from '@/features/auth'
 import { getApiErrorMessage } from '@/lib/http'
-import { useDeleteDocumento, useDocumentosQuery } from '@/features/documentos/api/queries'
+import { useDeleteDocumento, useDocumentosQuery, useUpdateDocumento } from '@/features/documentos/api/queries'
 import type { DocumentoFiltros as DocumentoFiltrosType, Documento } from '@/features/documentos/types'
 import { DocumentoFiltros } from '@/features/documentos/components/DocumentoFiltros'
 import { DocumentosTable } from '@/features/documentos/components/DocumentosTable'
@@ -35,6 +35,8 @@ export function DocumentosListPage() {
   const { data, isLoading, isError } = useDocumentosQuery(filtros, { page, size: PAGE_SIZE })
   const excluir = useDeleteDocumento()
 
+  const atualizar = useUpdateDocumento()
+
   const onConfirmarExclusao = () => {
     if (!paraExcluir?.id) return
 
@@ -52,6 +54,28 @@ export function DocumentosListPage() {
         setParaExcluir(null)
       },
     })
+  }
+
+  const onAtualizarSituacao = (documento: Documento, novaSituacao: string) => {
+    
+    const payload = {
+      id: documento.id ?? undefined, 
+      sigdoc: documento.sigdoc,
+      orgaoId: documento.orgao.id, 
+      emEspera: documento.emEspera ? 1 : 0, 
+      situacao: novaSituacao,
+      valor: documento.valor ?? undefined,
+    }
+    atualizar.mutate(
+      payload,{
+        onSuccess: () => {
+          toast.success('Situação do documento atualizada com sucesso.')
+        },
+        onError: (error) => {
+          toast.error(getApiErrorMessage(error))
+        }
+      }
+    )
   }
 
   return (
@@ -101,6 +125,7 @@ export function DocumentosListPage() {
             documentos={data.content}
             onExcluir={setParaExcluir}
             excluindoId={excluir.isPending ? paraExcluir?.id ?? null : null}
+            onAtualizarSituacao={onAtualizarSituacao}
           />
           <DataTablePagination page={data} onPageChange={setPage} />
         </>

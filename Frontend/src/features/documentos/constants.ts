@@ -6,7 +6,7 @@ export const SITUACAO_OPTIONS = [
   { label: 'Concluído', value: 'CONCLUIDO' },
   { label: 'Aguardando Validação', value: 'AGUARDANDO_VALIDACAO' },
   { label: 'Tramitado', value: 'TRAMITADO' },
-  { label: 'Devolvido', value: 'DEVOlVIDO' },
+  { label: 'Devolvido', value: 'DEVOLVIDO' },
   { label: 'Aguardando Retorno', value: 'AGUARDANDO_RETORNO' },
 ]
 

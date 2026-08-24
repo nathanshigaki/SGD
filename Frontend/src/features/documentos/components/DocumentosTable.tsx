@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 
 import { useCan } from '@/features/auth'
 import { formatBRL, formatDate } from '@/lib/format'
+import { SITUACAO_OPTIONS } from '@/features/documentos/constants'
 import type { Documento } from '@/features/documentos/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,16 +14,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface DocumentosTableProps {
   documentos: Documento[]
   onExcluir: (documento: Documento) => void
   excluindoId: string | null
+  onAtualizarSituacao?: (documento: Documento, novaSituacao: string) => void
 }
 
-export function DocumentosTable({ documentos, onExcluir, excluindoId }: DocumentosTableProps) {
+export function DocumentosTable({ documentos, onExcluir, excluindoId, onAtualizarSituacao }: DocumentosTableProps) {
   const podeAtualizar = useCan('DOCUMENTO:ATUALIZAR')
   const podeExcluir = useCan('DOCUMENTO:EXCLUIR')
+  const isAdmin = useCan('*:*')
 
   if (documentos.length === 0) {
     return (
@@ -52,12 +62,54 @@ export function DocumentosTable({ documentos, onExcluir, excluindoId }: Document
               <TableCell className="font-medium">{documento.sigdoc}</TableCell>
               <TableCell>{documento.orgao.acronimo}</TableCell>
               <TableCell>
-                {documento.situacao ? (
-                  <Badge variant="outline">{documento.situacao}</Badge>
+              {isAdmin ? (
+                <Select
+                  value={documento.situacao || ''} // 1. Mudamos de defaultValue para value
+                 onValueChange={(novoStatus) => {
+                  if (onAtualizarSituacao && novoStatus) {
+                    onAtualizarSituacao(documento, novoStatus)
+                  }
+                }}
+                >
+                  <SelectTrigger
+                    className={`h-8 w-[180px] font-medium transition-colors ${
+                      documento.situacao === 'APROVADO'
+                        ? '!bg-green-600 !text-white border-green-700'
+                        : documento.situacao === 'DEVOLVIDO'
+                        ? '!bg-red-600 !text-white border-red-700'
+                        : ''
+                    }`}
+                  >
+                    {/* 2. Deixe o SelectValue vazio! O shadcn descobre o texto sozinho */}
+                    <SelectValue placeholder="Situação" />
+                  </SelectTrigger>
+                  
+                  <SelectContent>
+                    {SITUACAO_OPTIONS.filter((opcao) => opcao.value !== '').map((opcao) => (
+                      <SelectItem key={opcao.value} value={opcao.value}>
+                        {opcao.label} {/* O SelectValue vai copiar este texto automaticamente */}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                documento.situacao ? (
+                  <Badge
+                    className={
+                      documento.situacao === 'APROVADO'
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : documento.situacao === 'DEVOLVIDO'
+                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                        : ''
+                    }
+                  >
+                    {SITUACAO_OPTIONS.find((opt) => opt.value === documento.situacao)?.label || documento.situacao}
+                  </Badge>
                 ) : (
-                  '-'
-                )}
-              </TableCell>
+                  '-' 
+                )
+              )}
+            </TableCell>
               <TableCell>{formatDate(documento.chegouEm)}</TableCell>
               <TableCell>{formatBRL(documento.valor)}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
